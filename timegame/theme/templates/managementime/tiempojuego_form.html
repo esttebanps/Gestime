@@ -1,0 +1,71 @@
+{% extends "./base.html" %}
+
+{% block titlepage %}
+    Registro
+{% endblock titlepage %}
+
+{% block title %}
+    Registro de tiempo
+{% endblock title %}
+
+{% block main %}
+    <section class="flex justify-center items-center">
+        <form method="post" class="bg-white pb-8 mb-4 w-80">
+            {% csrf_token %}
+            <div class="mb-4 w-full">
+                <label class="block text-black font-bold mb-2" for="select">
+                    Selecciona una consola:
+                    <span class="text-red-600">*</span>
+                </label>
+                <div class="relative">
+                    {{ form.consola }}
+                </div>
+            </div>
+            
+            <div class="flex">
+                <div class="mb-4 mr-2">
+                    <label class="block text-black font-bold mb-2" for="input1">
+                        Horas:
+                    </label>
+                    {{ form.horas }}
+                </div>
+                <div class="mb-4 ml-2">
+                    <label class="block text-black font-bold mb-2" for="input2">
+                        Minutos:
+                    </label>
+                    {{ form.minutos }}
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-black font-bold mb-2" for="input3">
+                    Controles extra:
+                </label>
+                {{ form.control_extra }}
+            </div>
+            <div class="mb-4">
+                <label class="block text-black font-bold mb-2" for="time">
+                    Hora de salida: 
+                    <span class="font-light">(opcional)</span>
+                </label>
+                {{ form.hora_fin }}
+            </div>
+            <div class="mb-4">
+                <label class="inline-flex items-center">
+                    {{ form.is_completed }}
+                    <span class="ml-2 text-black">Marque aquí si el cliente ya pagó</span>
+                </label>
+            </div>
+            <div class="mb-4">
+                <label class="inline-flex items-center">
+                    {{ form.is_active }}
+                    <span class="ml-2 text-black">Hecho</span>
+                </label>
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="w-full px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                    guardar
+                </button>              
+            </div>
+        </form>
+    </section>
+{% endblock main %}

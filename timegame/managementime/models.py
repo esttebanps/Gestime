@@ -5,9 +5,12 @@ from django.db import models
 
 class Consola(models.Model):
     nombre = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.nombre
 
 class TiempoJuego(models.Model):
-    consola = models.ForeignKey(Consola, on_delete=models.CASCADE)
+    consola = models.ForeignKey(Consola,null=True, on_delete=models.SET_NULL)
     horas = models.IntegerField(blank=True, null=True)
     minutos = models.IntegerField(blank=True, null=True)
     hora_inicio = models.TimeField(null=True)
@@ -15,12 +18,14 @@ class TiempoJuego(models.Model):
     control_extra = models.IntegerField(default=0)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
+    is_active = models.BooleanField()
+    
 
 class Precio(models.Model):
     tiempo_juego = models.OneToOneField(TiempoJuego, on_delete=models.CASCADE)
-    costo_control = models.DecimalField(max_digits=6, decimal_places=1, default=0)
-    costo_tiempo = models.DecimalField(max_digits=6, decimal_places=1)
-    costo_total = models.DecimalField(max_digits=6, decimal_places=1)
+    costo_control = models.IntegerField(default=0)
+    costo_tiempo = models.IntegerField(default=0)
+    costo_total = models.IntegerField(default=0)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
 

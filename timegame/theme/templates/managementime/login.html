@@ -1,0 +1,31 @@
+{% extends "./base.html" %}
+
+{% block titlepage %}
+  Inicio de sesión
+{% endblock titlepage %}
+
+{% block navbar %}
+{% endblock navbar %}
+
+{% block main %}
+<div class="bg-gray-100 flex justify-center items-center">
+  <div class="p-8 bg-white rounded-md shadow-md">
+    <h2 class="text-2xl font-medium mb-4">Iniciar sesión</h2>
+    <form method="post" class="">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label for="username" class="block text-gray-700 font-medium mb-2">Nombre de usuario</label>
+        {{ form.username }}
+      </div>
+      <div class="mb-4">
+        <label for="password" class="block text-gray-700 font-medium mb-2">Contraseña</label>
+        {{ form.password }}
+      </div>
+      <button type="submit" class="bg-yellow text-white tracking-widest uppercase font-medium w-full py-2 px-4 rounded-md shadow-md hover:bg-amber-400">Iniciar sesión</button>
+    </form>
+    <div class="mt-4 w-full ">
+      <a href="{% url 'password_reset' %}" class="text-black block text-center hover:text-amber-400">¿Olvidaste tu contraseña?</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

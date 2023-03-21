@@ -1,0 +1,61 @@
+{% extends "./base.html" %}
+
+{% block titlepage %}
+    Consolas
+{% endblock titlepage %}
+
+{% block title %}
+    Consolas
+{% endblock title %}
+
+{% block main %}
+<div class="overflow-x-auto">
+  <table>
+    <thead class="bg-gray text-white">
+      <tr class="">
+        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+        {% if perms.managementime.update_consola %}
+        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Editar</th>
+        {% endif %}
+        {% if perms.managementime.delete_consola %}
+        <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eliminar</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for consola in VerConsolaList %}
+      <tr class="border-b border-gray-400">
+        <td class="p-4 font-medium">{{consola}}</td>
+        {% if perms.managementime.update_consola %}
+        <td class="px-6 py-4 whitespace-nowrap text-lg text-neutral-600 hover:text-neutral-900"><a href="{% url 'actualizar_consolas' pk=consola.pk %}"><ion-icon name="eye-outline" class="cursor-pointer"></ion-icon></a></td>
+        {% endif %}
+        {% if perms.managementime.delete_consola %}
+        <td class="px-6 py-4 whitespace-nowrap text-lg text-red-600"><a href="#" onclick="eliminarConsola({{ consola.id }})"><ion-icon name="trash-outline"></ion-icon></a></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock main %}
+
+{% block js %}
+  <script>
+    function eliminarConsola(id){
+      Swal.fire({
+        title: 'Estas seguro de eliminar este registro?',
+        text: "¡Esta accion no se puede revertir!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, borrar',
+        cancelButtonText: 'Cancelar!',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/eliminar-consola/'+id +'/'
+        }
+      })
+    }
+  </script>
+{% endblock js %}

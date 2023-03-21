@@ -1,0 +1,79 @@
+{% extends "./base.html" %}
+
+{% block titlepage %}
+  Consultas
+{% endblock titlepage %}
+
+{% block title %}
+  Consulta de registros históricos
+{% endblock title %}
+
+{% block main %}
+<form method="get" class="md:flex">
+  <div class="md:flex">
+    <div class="mb-4 md:flex items-center md:mb-0 md:mr-8">
+      <label for="id_fecha_inicial" class="block font-bold text-black mb-2 md:mb-0 mr-2">Desde:</label>
+      {{ form.fecha_inicial }}
+    </div>
+    <div class="md:flex items-center">
+      <label for="id_fecha_final" class="block font-bold text-black mb-2 md:mb-0 mr-2">Hasta:</label>
+      {{ form.fecha_final }}
+    </div>
+  </div>
+    <button type="submit" class="w-full py-2 my-4 bg-yellow text-white font-medium tracking-widest uppercase rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200 md:w-48 md:ml-4">Buscar</button>
+</form>
+
+
+
+{% if registros %}
+  <div class="overflow-x-auto overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-black text-white">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consola</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horas</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Minutos</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora de entrada</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora de salida</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Control extra</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo control</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo tiempo</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo total</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            <div>
+                {% for tiempo in registros %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ tiempo.consola.nombre }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.horas }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.minutos }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.hora_inicio|time:"g:i A" }}</td>
+                    {% if tiempo.hora_fin == tiempo.hora_inicio %}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">no hay </td>
+                    {% else %}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.hora_fin|time:"g:i A" }}</td>
+                    {% endif %}
+
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.control_extra }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$  {{ tiempo.costo_control }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$  {{ tiempo.costo_tiempo }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-bold">$  {{ tiempo.costo_total }}</td>
+                </tr>
+                {% endfor %}
+            </div>
+        </tbody>
+    </table>
+  </div>
+  <div class=" bg-black text-white px-6 py-4 font-medium flex justify-between">
+    <div class="">
+      <p class="text-bold uppercase">Total</p>
+    </div>
+    <div class="mr-10">
+      <p class="">$ {{ total_costo }}</p>
+    </div>
+  </div>
+{% else %}
+  <p class="ml-8 uppercase">no hay registros</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "./base.html" %}
+
+{% block titlepage %}
+    Agregar consola
+{% endblock titlepage %}
+
+{% block title %}
+    Registro de consolas
+{% endblock title %}
+
+{% block main %}
+    <section class="flex justify-center items-center">
+        <form method="post" class="bg-white pb-8 mb-4 w-96 text-black">
+            {% csrf_token %}
+            <div class="w-full mb-4">
+                <label for="id_nombre" class="block text-black font-bold mb-2">Nombre de la consola:</label>
+                {{ form.nombre }}
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="w-full px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                    guardar
+                </button>              
+            </div>
+        </form>
+    </section>
+{% endblock main %}
