@@ -1,6 +1,9 @@
 # Gestime
 
-![screenshot](screenshot.png)
+![screenshot]()
+<img width="960" alt="2023-03-29 (2)" src="https://user-images.githubusercontent.com/86686071/228690064-8c6c77d1-3756-4de4-b14b-23a52d9110bb.png">
+
+
 
 ## Descripción
 
