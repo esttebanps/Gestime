@@ -1,10 +1,10 @@
-# GameTrack
+# Gestime
 
 ![screenshot](screenshot.png)
 
 ## Descripción
 
-GameTrack es un sistema de registro y seguimiento del tiempo de juego en una sala de videojuegos. El administrador puede crear cuentas de acceso para los empleados, quienes a su vez pueden registrar el inicio y fin de las sesiones de juego de los clientes. El sistema permite a los empleados visualizar la hora de salida y el costo total de las sesiones de juego de los clientes, así como generar reportes.
+Gestime es un sistema de registro y seguimiento del tiempo de juego en una sala de videojuegos. El administrador puede crear cuentas de acceso para los empleados, quienes a su vez pueden registrar el inicio y fin de las sesiones de juego de los clientes. El sistema permite a los empleados visualizar la hora de salida y el costo total de las sesiones de juego de los clientes, así como generar reportes.
 
 ## Características
 
