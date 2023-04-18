@@ -117,7 +117,7 @@ class TiempoJuegoCreateView(CreateView):
         
         precio.tiempo_juego = tiempo_juego
         precio.save()
-        messages.success(self.request,'creado correctamente')
+        messages.success(self.request,'Creado correctamente')
         
         return super().form_valid(form)
 
@@ -186,7 +186,7 @@ class TiempoJuegoUpdateView(UpdateView):
         precio.save()
             
         tiempo_juego.save()
-        messages.success(self.request,'modificado correctamente')
+        messages.success(self.request,'Modificado correctamente')
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
@@ -299,57 +299,6 @@ class SignUpView(PermissionRequiredMixin,CreateView):
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-        if tiempo_juego.horas is not None and tiempo_juego.minutos is not None:
-            # Calcular la hora de finalización.
-            tiempo_fin = datetime.datetime.combine(datetime.datetime.now().date(), horas) + datetime.timedelta(hours=tiempo_juego.horas, minutes=tiempo_juego.minutos)
-            tiempo_juego.hora_fin = tiempo_fin.time()
-            
-        elif tiempo_juego.hora_fin is None:
-            tiempo_juego.hora_fin = None
-            
-        tiempo_juego.save()
-        
-        # Calcular los campos del modelo Precio.
-        horas = form.cleaned_data['horas']
-        minutos = form.cleaned_data['minutos']
-        control_extra = form.cleaned_data['control_extra']
-        costo_control = 500  # Puedes usar una constante o un valor calculado dinámicamente.
-        costo_tiempo = (horas * 60 + minutos) * 50
-        total_control_extra = control_extra * costo_control
-        costo_total = costo_control + costo_tiempo + total_control_extra
-            
-
-        # Crear una instancia de Precio y asignar los valores.
-        precio = Precio()
-        precio.costo_control = total_control_extra
-        precio.costo_tiempo = costo_tiempo
-        precio.costo_total = costo_total
-        
-        # Asignar la instancia de TiempoJuego y guardar ambas instancias.
-        precio.tiempo_juego = tiempo_juego
-        precio.save()
-
-        return super().form_valid(form)
-"""  
-
-
+@method_decorator(login_required(login_url='/login/'),name='dispatch')
+class TerminosView(TemplateView):
+    template_name = "managementime/terminos.html"

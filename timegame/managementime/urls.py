@@ -13,6 +13,7 @@ urlpatterns = [
     path('eliminar-consola/<int:pk>/', ConsolaDeleteView, name='eliminar_consolas'),
     path('actualizar-consola/<int:pk>/', ConsolaUpdateView.as_view(), name='actualizar_consolas'),
     path('reporte/', RegistrosPorRangoFechasView.as_view(), name='reporte'),
+    path('terminos/', TerminosView.as_view(), name='terminos'),
     
     #authenticate
     #Registro de usuario
