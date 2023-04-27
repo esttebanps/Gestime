@@ -9,7 +9,7 @@
 
 {% block main %}
 <div class="bg-gray-100 flex justify-center items-center">
-  <div class="p-8 bg-white rounded-md shadow-md">
+  <div class="w-full md:w-1/2 p-8 bg-white rounded-md shadow-md">
     <h2 class="text-2xl font-medium mb-4">Iniciar sesión</h2>
     <form method="post" class="">
       {% csrf_token %}
@@ -26,6 +26,20 @@
     <div class="mt-4 w-full ">
       <a href="{% url 'password_reset' %}" class="text-black block text-center hover:text-amber-400">¿Olvidaste tu contraseña?</a>
     </div>
+
+    {% if form.errors %}
+    <div class="w-full bg-red-100 border border-red-400 text-red-700 mt-4 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">Error:</strong>
+        <span class="block sm:inline">Se han encontrado los siguientes errores en el formulario:</span>
+        <ul class="mt-2 list-disc list-inside">
+            {% for field_errors in form.errors.values %}
+                {% for error in field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
