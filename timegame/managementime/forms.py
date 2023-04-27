@@ -27,6 +27,17 @@ class TiempoJuegoForm(forms.ModelForm):
             'is_completed': CheckboxInput(attrs={'class':'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}),
             'is_active': CheckboxInput(attrs={'class':'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}),
         }
+    def clean(self):
+        cleaned_data = super().clean()
+        horas = cleaned_data.get('horas')
+        minutos = cleaned_data.get('minutos')
+        control_extra = cleaned_data.get('control_extra')
+            
+        if horas < 0 or minutos < 0:
+            raise forms.ValidationError('El valor de horas o minutos es inválido.')
+        if control_extra > 3:
+            raise forms.ValidationError('El número de controles extra no puede ser mayor a 3.')
+
 
 #Formulario Django para crear/actualizar instancias de Consola con un campo nombre y un widget personalizado TextInput.
 class consolaForm(forms.ModelForm):

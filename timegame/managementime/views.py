@@ -117,7 +117,7 @@ class TiempoJuegoCreateView(CreateView):
         
         precio.tiempo_juego = tiempo_juego
         precio.save()
-        messages.success(self.request,'Creado correctamente')
+        messages.success(self.request,'La operación se ha completado con éxito.')
         
         return super().form_valid(form)
 
@@ -186,7 +186,7 @@ class TiempoJuegoUpdateView(UpdateView):
         precio.save()
             
         tiempo_juego.save()
-        messages.success(self.request,'Modificado correctamente')
+        messages.success(self.request,'Los cambios se han guardado exitosamente.')
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
@@ -205,6 +205,7 @@ class TiempoJuegoListView(ListView):
         return queryset
 
 @login_required
+@permission_required('managementime.delete_tiempojuego')
 def TiempoJuegoDeleteView(request, pk):
     usuario = get_object_or_404(TiempoJuego, pk=pk)
     usuario.delete()

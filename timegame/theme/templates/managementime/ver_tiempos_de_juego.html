@@ -27,7 +27,9 @@ Tiempos de juego
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo total</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pago</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ver</th>
+                {% if perms.managementime.delete_tiempojuego %}
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eliminar</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -60,7 +62,9 @@ Tiempos de juego
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-lg text-neutral-600 hover:text-neutral-900"><a href="{% url 'actualizar' pk=tiempo.pk %}"><ion-icon name="eye-outline" class="cursor-pointer"></ion-icon></a></td>
+                    {% if perms.managementime.delete_tiempojuego %}
                     <td class="px-6 py-4 whitespace-nowrap text-lg text-red-600"><a href="#" onclick="eliminarJuego({{ tiempo.id }})"><ion-icon name="trash-outline"></ion-icon></a></td>
+                    {% endif %}
                 </tr>
                 {% endif %}
                 {% endfor %}
@@ -86,7 +90,9 @@ Tiempos de juego
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Costo total</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pago</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ver</th>
+                {% if perms.managementime.delete_tiempojuego %}
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eliminar</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -97,7 +103,11 @@ Tiempos de juego
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ tiempo.consola.nombre }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.horas }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.minutos }}</td>
+                    {% if tiempo.horas == 0  and tiempo.minutos == 0 %}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">0</td>
+                    {% else %}
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.hora_inicio|time:"g:i A" }}</td>
+                    {% endif %}
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.hora_fin|time:"g:i A" }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ tiempo.control_extra }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$  {{ tiempo.costo_control }}</td>
@@ -115,7 +125,9 @@ Tiempos de juego
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-lg text-neutral-600 hover:text-neutral-900"><a href="{% url 'actualizar' pk=tiempo.pk %}"><ion-icon name="eye-outline" class="cursor-pointer"></ion-icon></a></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-lg text-red-600"><a href="#" onclick="eliminarJuego({{ tiempo.id }})" class="btn-delete"><ion-icon name="trash-outline"></ion-icon></a></td>
+                    {% if perms.managementime.delete_tiempojuego %}
+                    <td class="px-6 py-4 whitespace-nowrap text-lg text-red-600"><a href="#" onclick="eliminarJuego({{ tiempo.id }})"><ion-icon name="trash-outline"></ion-icon></a></td>
+                    {% endif %}
                 </tr>
                 {% endif %}
                 {% endfor %}
@@ -129,14 +141,14 @@ Tiempos de juego
     <script>
         function eliminarJuego(id){
             Swal.fire({
-                title: 'Estas seguro de eliminar este registro?',
-                text: "¡Esta accion no se puede revertir!",
+                title: '¿Desea eliminar este registro?',
+                text: "Esta acción es irreversible.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, borrar',
-                cancelButtonText: 'Cancelar!',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = '/eliminar-tiempo/'+id +'/'

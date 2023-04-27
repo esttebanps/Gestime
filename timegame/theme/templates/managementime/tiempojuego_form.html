@@ -28,6 +28,7 @@
                         Horas:
                     </label>
                     {{ form.horas }}
+                    
                 </div>
                 <div class="mb-4 ml-2">
                     <label class="block text-black font-bold mb-2" for="input2">
@@ -66,6 +67,20 @@
                     guardar
                 </button>              
             </div>
+            {% if form.errors %}
+            <div class="w-full bg-red-100 border border-red-400 text-red-700 mt-4 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error:</strong>
+                <span class="block sm:inline">Se han encontrado los siguientes errores en el formulario:</span>
+                <ul class="mt-2 list-disc list-inside">
+                    {% for field_errors in form.errors.values %}
+                        {% for error in field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
         </form>
+        
     </section>
 {% endblock main %}
