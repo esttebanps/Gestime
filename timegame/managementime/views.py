@@ -3,7 +3,7 @@ from datetime import date, timedelta, time
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView
@@ -12,6 +12,9 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import F, Sum
 from .forms import *
 from .models import Consola, TiempoJuego, Precio
+from django.core import serializers
+from django.http import HttpResponse
+from itertools import chain
 
 #Este código define una vista basada en clase que renderiza una plantilla HTML e incluye información de un modelo TiempoJuego, como el total de horas, minutos, costo de tiempo y control, y costo total.
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
@@ -303,3 +306,33 @@ class SignUpView(PermissionRequiredMixin,CreateView):
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class TerminosView(TemplateView):
     template_name = "managementime/terminos.html"
+
+def backup(request):
+    tiempo_juegos = TiempoJuego.objects.all()
+    consolas = Consola.objects.all()
+    precios = Precio.objects.all()
+
+    # Concatenamos los tres conjuntos de objetos en una sola lista
+    data = list(chain(tiempo_juegos, consolas, precios))
+
+    # Serializamos la lista completa
+    data = serializers.serialize('json', data)
+
+    # Creamos la respuesta HTTP y la devolvemos
+    response = HttpResponse(data, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename="backup.json"'
+    return response
+
+def restore(request):
+    if request.method == 'POST':
+        form = BackupForm(request.POST, request.FILES)
+        if form.is_valid():
+            backup_file = request.FILES['backup_file']
+            data = backup_file.read().decode('utf-8')
+            objects = serializers.deserialize('json', data)
+            for obj in objects:
+                obj.save()
+            return HttpResponse('La copia de seguridad se ha cargado correctamente.')
+    else:
+        form = BackupForm()
+    return render(request, 'managementime/restore.html', {'form': form})

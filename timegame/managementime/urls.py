@@ -15,6 +15,9 @@ urlpatterns = [
     path('reporte/', RegistrosPorRangoFechasView.as_view(), name='reporte'),
     path('terminos/', TerminosView.as_view(), name='terminos'),
     
+    path('backup/', backup, name='backup'),
+    path('restore/', restore, name='restore'),
+    
     #authenticate
     #Registro de usuario
     path('signup/', SignUpView.as_view(), name='signup'),
