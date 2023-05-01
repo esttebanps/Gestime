@@ -34,6 +34,12 @@ class index(ListView):
         costo_tiempo = context['object_list'].aggregate(costo_tiempo=Sum('precio__costo_tiempo'))['costo_tiempo']
         costo_control = context['object_list'].aggregate(costo_control=Sum('precio__costo_control'))['costo_control']
         control_extra = context['object_list'].aggregate(control_extra=Sum('control_extra'))['control_extra']
+
+        # Sumar los minutos a las horas cuando los minutos superan los 60
+        if total_minutos:
+            total_horas += total_minutos // 60
+            total_minutos = total_minutos % 60
+
         if costo_tiempo:
             costo_total = costo_tiempo + costo_control
         else:
@@ -43,6 +49,7 @@ class index(ListView):
             costo_control = 0
             control_extra = 0
             costo_total = 0
+
         context.update({
             'total_horas': total_horas,
             'total_minutos': total_minutos,
@@ -271,8 +278,13 @@ class RegistrosPorRangoFechasView(TemplateView):
         if self.request.GET and context['form'].is_valid():
             fecha_inicial = context['form'].cleaned_data['fecha_inicial']
             fecha_final = context['form'].cleaned_data['fecha_final']
+            consola = context['form'].cleaned_data.get('consola')
+            
             registros = TiempoJuego.objects.filter(fecha_creacion__range=(fecha_inicial, fecha_final)).select_related('precio')
 
+            if consola:
+                registros = registros.filter(consola=consola)
+            
             # Agregar precios a cada registro
             for registro in registros:
                 registro.costo_control = registro.precio.costo_control
@@ -286,6 +298,15 @@ class RegistrosPorRangoFechasView(TemplateView):
             total_costo = registros.aggregate(total=Sum('precio__costo_total'))['total']
             context['total_costo'] = total_costo
 
+            total_horas_minutos = registros.aggregate(total_horas=Sum('horas'), total_minutos=Sum('minutos'))
+
+        # Sumar los minutos adicionales a las horas
+            horas_extra, minutos = divmod(total_horas_minutos['total_minutos'], 60)
+            total_horas_minutos['total_horas'] += horas_extra
+            total_horas_minutos['total_minutos'] = minutos
+
+            context['total_horas'] = total_horas_minutos['total_horas']
+            context['total_minutos'] = total_horas_minutos['total_minutos']
         return context
 
 #autenticacion de usuraios
