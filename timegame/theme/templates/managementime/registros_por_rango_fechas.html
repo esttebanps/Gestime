@@ -15,13 +15,30 @@
       <label for="id_fecha_inicial" class="block font-bold text-black mb-2 md:mb-0 mr-2">Desde:</label>
       {{ form.fecha_inicial }}
     </div>
-    <div class="md:flex items-center">
+    <div class="mb-4 md:flex items-center md:mb-0 md:mr-8">
       <label for="id_fecha_final" class="block font-bold text-black mb-2 md:mb-0 mr-2">Hasta:</label>
       {{ form.fecha_final }}
+    </div>
+    <div class="md:flex items-center md:mb-0 md:mr-8">
+      <label for="id_consola" class="block font-bold text-black mb-2 md:mb-0 mr-2">Consola</label>
+      {{ form.consola }}
     </div>
   </div>
     <button type="submit" class="w-full py-2 my-4 bg-yellow text-white font-medium tracking-widest uppercase rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200 md:w-48 md:ml-4">Buscar</button>
 </form>
+{% if form.errors %}
+  <div class="w-full bg-red-100 border border-red-400 text-red-700 mt-4 px-4 py-3 rounded relative" role="alert">
+      <strong class="font-bold">Error:</strong>
+      <span class="block sm:inline">Se han encontrado los siguientes errores en el formulario:</span>
+      <ul class="mt-2 list-disc list-inside">
+        {% for field_errors in form.errors.values %}
+          {% for error in field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+  </div>
+{% endif %}
 
 
 
@@ -65,13 +82,19 @@
         </tbody>
     </table>
   </div>
-  <div class=" bg-black text-white px-6 py-4 font-medium flex justify-between">
+  <div class="bg-black text-white px-6 py-4 font-medium flex justify-between">
     <div class="">
       <p class="text-bold uppercase">Total</p>
+      <p class="text-bold uppercase">horas</p>
+      <p class="text-bold uppercase">minutos</p>
     </div>
     <div class="mr-10">
-      <p class="">$ {{ total_costo }}</p>
+      <p class="text-right font-bold">$ {{ total_costo }}</p>
+      <p class="text-right">{{ total_horas }} horas</p>
+      <p class="text-right">{{ total_minutos }} minutos</p>
     </div>
+  </div>
+  
   </div>
 {% else %}
   <p class="ml-8 uppercase">no hay registros</p>

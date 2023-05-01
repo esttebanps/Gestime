@@ -33,11 +33,18 @@ class TiempoJuegoForm(forms.ModelForm):
         minutos = cleaned_data.get('minutos')
         control_extra = cleaned_data.get('control_extra')
             
-        if horas < 0 or minutos < 0:
+        if horas < 0 or minutos < 0 or minutos > 60:
             raise forms.ValidationError('El valor de horas o minutos es inválido.')
         if control_extra > 3:
             raise forms.ValidationError('El número de controles extra no puede ser mayor a 3.')
 
+        while minutos >= 60:
+            horas += 1
+            minutos -= 60
+
+        cleaned_data['horas'] = horas
+        cleaned_data['minutos'] = minutos
+        return cleaned_data
 
 #Formulario Django para crear/actualizar instancias de Consola con un campo nombre y un widget personalizado TextInput.
 class consolaForm(forms.ModelForm):
@@ -52,14 +59,15 @@ class consolaForm(forms.ModelForm):
 class ReporteForm(forms.Form):
     fecha_inicial = forms.DateField(label='Fecha inicial', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
     fecha_final = forms.DateField(label='Fecha final', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
+    consola = forms.ModelChoiceField(queryset=Consola.objects.all(), required=False, widget=forms.Select(attrs={'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
     
     def clean(self):
         cleaned_data = super().clean()
         fecha_inicial = cleaned_data.get('fecha_inicial')
         fecha_final = cleaned_data.get('fecha_final')
 
-        if fecha_inicial and fecha_final and fecha_inicial > fecha_final:
-            raise forms.ValidationError('La fecha inicial no puede ser mayor que la fecha final.')
+        if fecha_inicial and fecha_final and fecha_inicial >= fecha_final:
+            raise forms.ValidationError('La fecha inicial no puede ser mayor o igual que la fecha final.')
 
 #Formulario de registro de usuario personalizado en Django con campos de correo electrónico, nombre de usuario, contraseña y confirmación de contraseña.
 class CustomUserCreationForm(UserCreationForm):
@@ -124,3 +132,11 @@ class BackupForm(forms.Form):
         label='Seleccione el archivo de copia de seguridad',
         help_text='El archivo debe estar en formato JSON'
     )
+    
+    def clean_backup_file(self):
+        backup_file = self.cleaned_data.get('backup_file')
+        if backup_file:
+            if not backup_file.name.endswith('.json'):
+                raise forms.ValidationError('El archivo debe estar en formato JSON')
+        return backup_file
+    
