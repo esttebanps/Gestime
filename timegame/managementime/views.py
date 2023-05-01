@@ -357,3 +357,6 @@ def restore(request):
     else:
         form = BackupForm()
     return render(request, 'managementime/restore.html', {'form': form})
+
+def pagina_no_encontrada(request, exception):
+    return render(request, 'templates/404.html')

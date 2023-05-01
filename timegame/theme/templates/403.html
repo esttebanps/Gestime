@@ -1,0 +1,14 @@
+{% extends "./managementime/base.html" %}
+
+{% block navbar %}
+{% endblock navbar %}
+
+{% block main %}
+<div class="flex items-center justify-center h-screen">
+  <div class="bg-white p-8 rounded shadow-md">
+      <h1 class="text-4xl font-bold mb-6 text-center text-gray-700">Error 403 - Acceso denegado</h1>
+      <p class="text-lg mb-4 text-gray-700">Lo sentimos, no tienes permisos para acceder a esta página.</p>
+      <a href="{% url 'inicio' %}" class="inline-block bg-yellow hover:bg-yellow text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Regresar al inicio</a>
+  </div>
+</div>
+{% endblock %}

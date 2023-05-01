@@ -27,10 +27,18 @@
       <tr class="border-b border-gray-400">
         <td class="p-4 font-medium">{{consola}}</td>
         {% if perms.managementime.update_consola %}
-        <td class="px-6 py-4 whitespace-nowrap text-lg text-neutral-600 hover:text-neutral-900"><a href="{% url 'actualizar_consolas' pk=consola.pk %}"><ion-icon name="eye-outline" class="cursor-pointer"></ion-icon></a></td>
+        <td class="px-6 py-4 whitespace-nowrap text-lg font-semibold text-neutral-600 hover:text-neutral-900">
+          <a href="{% url 'actualizar_consolas' pk=consola.pk %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Ver</title><path fill="#2a2a2a" d="M12 9a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3m0-4.5c5 0 9.27 3.11 11 7.5c-1.73 4.39-6 7.5-11 7.5S2.73 16.39 1 12c1.73-4.39 6-7.5 11-7.5M3.18 12a9.821 9.821 0 0 0 17.64 0a9.821 9.821 0 0 0-17.64 0Z"/></svg>
+          </a>
+        </td>
         {% endif %}
         {% if perms.managementime.delete_consola %}
-        <td class="px-6 py-4 whitespace-nowrap text-lg text-red-600"><a href="#" onclick="eliminarConsola({{ consola.id }})"><ion-icon name="trash-outline"></ion-icon></a></td>
+        <td class="px-6 py-4 whitespace-nowrap text-lg font-semibold text-red-600">
+          <a href="#" onclick="eliminarConsola({{ consola.id }})">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Eliminar</title><path fill="#FF0000" d="M9 3v1H4v2h1v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1V4h-5V3H9M7 6h10v13H7V6m2 2v9h2V8H9m4 0v9h2V8h-2Z"/></svg>
+          </a>
+        </td>
         {% endif %}
       </tr>
       {% endfor %}
