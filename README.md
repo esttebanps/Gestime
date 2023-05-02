@@ -29,6 +29,3 @@ Gestime es un sistema de registro y seguimiento del tiempo de juego en una sala 
 - Acceder a la aplicación en `http://localhost:8000`.
 - Acceder al panel de administración en `http://localhost:8000/admin` con las credenciales del superusuario creado previamente.
 
-## Licencia
-
-Este proyecto está bajo la licencia MIT.
