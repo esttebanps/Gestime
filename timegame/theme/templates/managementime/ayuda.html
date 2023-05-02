@@ -1,0 +1,14 @@
+{% extends "./base.html" %}
+
+{% block main %}
+<div x-data="{ open: false }">
+    <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
+        <span>Título de la sección 1</span>
+        <span x-text="open ? '-' : '+'"></span>
+    </button>
+    <div x-show="open" class="px-4 py-2 bg-white rounded-lg shadow-lg">
+        <p>Contenido de la sección 1</p>
+    </div>
+</div>
+
+{% endblock main %}

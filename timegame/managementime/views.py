@@ -360,3 +360,6 @@ def restore(request):
 
 def pagina_no_encontrada(request, exception):
     return render(request, 'templates/404.html')
+
+def ayuda(request):
+    return render(request, 'managementime/ayuda.html')
