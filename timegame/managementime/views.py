@@ -1,20 +1,26 @@
 import datetime
 from datetime import date, timedelta, time
+import json
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import ListView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, FormView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import F, Sum
+from requests import request
 from .forms import *
 from .models import Consola, TiempoJuego, Precio
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError
+from django.template.loader import render_to_string
 from itertools import chain
+from django.core.mail import send_mail
+from django.conf import settings
 
 #Este código define una vista basada en clase que renderiza una plantilla HTML e incluye información de un modelo TiempoJuego, como el total de horas, minutos, costo de tiempo y control, y costo total.
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
@@ -252,7 +258,7 @@ class ConsolaUpdateView(PermissionRequiredMixin,UpdateView):
 
     def form_valid(self, form):
         Consola.save
-        messages.success(self.request,'modificado correctamente')
+        messages.success(self.request,'Modificado correctamente')
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
@@ -328,38 +334,68 @@ class SignUpView(PermissionRequiredMixin,CreateView):
 class TerminosView(TemplateView):
     template_name = "managementime/terminos.html"
 
-def backup(request):
-    tiempo_juegos = TiempoJuego.objects.all()
-    consolas = Consola.objects.all()
-    precios = Precio.objects.all()
+@method_decorator(login_required(login_url='/login/'),name='dispatch')
+class BackupView(View):
+    def get(self, request):
+        tiempo_juegos = TiempoJuego.objects.all()
+        consolas = Consola.objects.all()
+        precios = Precio.objects.all()
 
-    # Concatenamos los tres conjuntos de objetos en una sola lista
-    data = list(chain(tiempo_juegos, consolas, precios))
+        # Concatenamos los tres conjuntos de objetos en una sola lista
+        data = list(chain(tiempo_juegos, consolas, precios))
 
-    # Serializamos la lista completa
-    data = serializers.serialize('json', data)
+        # Serializamos la lista completa
+        data = serializers.serialize('json', data)
 
-    # Creamos la respuesta HTTP y la devolvemos
-    response = HttpResponse(data, content_type='application/json')
-    response['Content-Disposition'] = 'attachment; filename="backup.json"'
-    return response
+        # Creamos la respuesta HTTP y la devolvemos
+        response = HttpResponse(data, content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename="backup-alpha-gamer.json"'
+        return response
 
-def restore(request):
-    if request.method == 'POST':
-        form = BackupForm(request.POST, request.FILES)
-        if form.is_valid():
-            backup_file = request.FILES['backup_file']
-            data = backup_file.read().decode('utf-8')
+@method_decorator(login_required(login_url='/login/'),name='dispatch')
+class RestoreView(FormView):
+    template_name = 'managementime/restore.html'
+    form_class = BackupForm
+    success_url = '/restore/'
+
+    def form_valid(self, form):
+        backup_file = self.request.FILES['backup_file']
+        data = backup_file.read().decode('utf-8')
+        try:
             objects = serializers.deserialize('json', data)
             for obj in objects:
                 obj.save()
-            return HttpResponse('La copia de seguridad se ha cargado correctamente.')
-    else:
-        form = BackupForm()
-    return render(request, 'managementime/restore.html', {'form': form})
+            messages.success(self.request,'Restaurado correctamente')
+            return super().form_valid(form)
+        except Exception as e:
+            error_message = {'message': str(e)}
+            return HttpResponseServerError(render_to_string('error500.html', context=error_message))
 
-def pagina_no_encontrada(request, exception):
-    return render(request, 'templates/404.html')
+    def form_invalid(self, form):
+        return super().form_invalid(form)
 
-def ayuda(request):
-    return render(request, 'managementime/ayuda.html')
+
+class AyudaView(View):
+    template_name = 'managementime/ayuda.html'
+    success_template_name = 'managementime/contact_success.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+
+        # Envía el correo electrónico al soporte técnico de la empresa
+        send_mail(
+            subject,
+            f'Nombre: {name}\nCorreo electrónico: {email}\nMensaje: {message}',
+            settings.DEFAULT_FROM_EMAIL,
+            ['angelesteban0326@gmail.com'],
+            fail_silently=False,
+        )
+
+        # Renderiza una página de confirmación de envío
+        return render(request, self.success_template_name)

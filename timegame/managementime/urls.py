@@ -14,10 +14,10 @@ urlpatterns = [
     path('actualizar-consola/<int:pk>/', ConsolaUpdateView.as_view(), name='actualizar_consolas'),
     path('reporte/', RegistrosPorRangoFechasView.as_view(), name='reporte'),
     path('terminos/', TerminosView.as_view(), name='terminos'),
-    path('ayuda/', ayuda, name='terminos'),
+    path('ayuda/', AyudaView.as_view(), name='ayuda'),
     
-    path('backup/', backup, name='backup'),
-    path('restore/', restore, name='restore'),
+    path('backup/', BackupView.as_view(), name='backup'),
+    path('restore/', RestoreView.as_view(), name='restore'),
     
     #authenticate
     #Registro de usuario
