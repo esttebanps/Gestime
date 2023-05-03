@@ -1,14 +1,133 @@
 {% extends "./base.html" %}
 
+{% block titlepage %}
+    Ayuda
+{% endblock titlepage %}
+
+{% block navbar %}
+<nav class="py-8 px-4">
+    <p class="text-lg font-semibold tracking-widest text-yellow uppercase rounded-lg dark-mode:text-white focus:outline-none focus:shadow-outline">Alpha Gamer</p>
+</nav>
+{% endblock navbar %}
+
 {% block main %}
-<div x-data="{ open: false }">
-    <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
-        <span>Título de la sección 1</span>
-        <span x-text="open ? '-' : '+'"></span>
-    </button>
-    <div x-show="open" class="px-4 py-2 bg-white rounded-lg shadow-lg">
-        <p>Contenido de la sección 1</p>
+<div class="md:px-8">
+    <p class="text-2xl font-bold mb-8">Preguntas frecuentes</p>
+    <div x-data="{ open: false }" class="mb-2">
+        <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
+            <span>¿Cómo registro una cuenta en la aplicación?</span>
+            <span x-text="open ? '-' : '+'"></span>
+        </button>
+        <div x-show="open" class="px-8 py-2 bg-white rounded-lg shadow-lg">
+            <p>Para registrar una cuenta en nuestra aplicación, sigue estos sencillos pasos:</p>
+            <ul class="list-decimal ml-8 my-4">
+                <li>Dirígete a la página de <a href="{% url 'signup' %}" class="text-yellow font-medium hover:underline underline-offset-2">registro</a> en la aplicación.</li>
+                <li>Completa el formulario de registro, ingresando tu nombre de usuario, correo electrónico y una contraseña segura.</li>
+                <li>Haz clic en el botón de registro para completar el proceso.</li>
+            </ul>
+            <p>Una vez que hayas registrado tu cuenta, podrás iniciar sesión en la aplicación con tu nombre de usuario y contraseña. Si tienes algún problema para registrarte, por favor contáctanos a través del soporte técnico de la aplicación y te ayudaremos a solucionar cualquier problema que puedas estar enfrentando.</p>
+        </div>
     </div>
+    <div x-data="{ open: false }" class="mb-2">
+        <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
+            <span>¿Cómo cambio mi contraseña?</span>
+            <span x-text="open ? '-' : '+'"></span>
+        </button>
+        <div x-show="open" class="px-8 py-2 bg-white rounded-lg shadow-lg">
+            <p>Para cambiar tu contraseña en nuestra aplicación, sigue estos pasos:</p>
+            <ul class="list-decimal ml-8 my-4">
+                <li>Inicia sesión en la aplicación con tu nombre de usuario y contraseña actual.</li>
+                <li>Dirígete a la sección de configuración de la cuenta.</li>
+                <li>Busca la opción de <a href="{% url 'password_change' %}" class="text-yellow font-medium hover:underline underline-offset-2">"Cambiar contraseña"</a> y haz clic en ella.</li>
+                <li>Ingresa tu contraseña actual y la nueva contraseña que deseas usar. Asegúrate de elegir una contraseña segura y única.</li>
+                <li>Haz clic en el botón de "Guardar cambios" para completar el proceso.</li>
+            </ul>
+            <p>Una vez que hayas actualizado tu contraseña, asegúrate de guardarla en un lugar seguro. Si tienes algún problema para cambiar tu contraseña, por favor contáctanos a través del soporte técnico de la aplicación y te ayudaremos a solucionar cualquier problema que puedas estar enfrentando.</p>
+        </div>
+    </div>
+    <div x-data="{ open: false }" class="mb-2">
+        <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
+            <span>¿Cómo recupero mi contraseña?</span>
+            <span x-text="open ? '-' : '+'"></span>
+        </button>
+        <div x-show="open" class="px-8 py-2 bg-white rounded-lg shadow-lg">
+            <p>Si has olvidado tu contraseña para acceder a nuestra aplicación, no te preocupes, puedes recuperarla siguiendo estos pasos:</p>
+            <ul class="list-decimal ml-8 my-4">
+                <li>Dirígete a la página de inicio de sesión de la aplicación.</li>
+                <li>Haz clic en el enlace "¿Olvidaste tu contraseña?"</li>
+                <li>Ingresa tu dirección de correo electrónico asociada con tu cuenta en la aplicación y haz clic en el botón de "Enviar".</li>
+                <li>Revisa tu correo electrónico para encontrar un enlace que te permita restablecer tu contraseña.</li>
+                <li>Sigue las instrucciones proporcionadas en el correo electrónico o en la pantalla de la aplicación para restablecer tu contraseña y recuperar el acceso a tu cuenta.</li>
+            </ul>
+            <p>Si no puedes encontrar el correo electrónico con el enlace, asegúrate de revisar tu carpeta de correo no deseado o spam. Si tienes algún problema para recuperar tu contraseña, por favor contáctanos a través del soporte técnico de la aplicación y te ayudaremos a solucionar cualquier problema que puedas estar enfrentando.</p>
+        </div>
+    </div>
+    <div x-data="{ open: false }" class="mb-2">
+        <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
+            <span>¿Cómo registro un tiempo de juego?</span>
+            <span x-text="open ? '-' : '+'"></span>
+        </button>
+        <div x-show="open" class="px-8 py-2 bg-white rounded-lg shadow-lg">
+            <p>Para registrar un tiempo de juego en nuestra aplicación, sigue los siguientes pasos:</p>
+            <ul class="list-decimal ml-8 my-4">
+                <li>Ingresa a tu cuenta en nuestra aplicación y dirígete a la página de <a href="{% url 'registrar' %}" class="text-yellow font-medium hover:underline underline-offset-2">'Registro de tiempo'.</a></li>
+                <li>Selecciona la consola en la que se jugara el tiempo y la cantidad de horas y minutos que se jugaran.</li>
+                <li>Opcionalmente, puedes ingresar la cantidad de controles utilizados y marcar si el cliente ya pagó su tiempo.</li>
+                <li>Si el tiempo ya se ha cumplido, marca la opción 'hecho' para finalizar el registro.</li>
+            </ul>
+            <p>Recuerda que puedes registrar múltiples tiempos de juego para una misma consola en diferentes momentos. Si tienes alguna duda o problema, no dudes en contactarnos a través del soporte técnico de la aplicación y te ayudaremos a solucionarlo.</p>
+        </div>
+    </div>
+    <div x-data="{ open: false }" class="mb-2">
+        <button @click="open = !open" class="flex justify-between items-center w-full py-4 px-6 bg-yellow text-black font-semibold uppercase rounded-lg hover:bg-amber-400 focus:outline-none">
+            <span>¿Cómo registro una consola?</span>
+            <span x-text="open ? '-' : '+'"></span>
+        </button>
+        <div x-show="open" class="px-8 py-2 bg-white rounded-lg shadow-lg">
+            <p>Para registrar una consola en nuestra aplicación, sigue estos pasos:</p>
+            <ul class="list-decimal ml-8 my-4">
+                <li>Dirígete a la página de <a href="{% url 'consola' %}" class="text-yellow font-medium hover:underline underline-offset-2">'Registrar consola'.</a></li>
+                <li>Ingresa el nombre de la consola en el campo correspondiente.</li>
+                <li>Presiona el botón 'Guardar' para registrar la consola en la base de datos.</li>
+            </ul>
+            <p>Recuerda que debes contar con permiso de 'Administrador' para ejecutar esta acción. Si tienes alguna duda o problema, no dudes en contactarnos a través del soporte técnico de la aplicación y te ayudaremos a solucionarlo.</p>
+        </div>
+    </div>
+    
+    <!-- Formulario de contacto -->
+        <p class="text-2xl font-bold my-8">Formulario de contacto</p>
+    
+        <form method="post" class="w-full md:w-96 mb-4">
+            {% csrf_token %}
+    
+            <div class="mb-4">
+                <label for="name" class="block font-bold mb-2">Nombre:</label>
+                <input type="text" id="name" name="name" placeholder="Tu nombre" required class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+    
+            <div class="mb-4">
+                <label for="email" class="block font-bold mb-2">Correo electrónico:</label>
+                <input type="email" id="email" name="email" placeholder="Tu correo electronico" required class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+    
+            <div class="mb-4">
+                <label for="subject" class="block font-bold mb-2">Asunto:</label>
+                <input type="text" id="subject" name="subject" placeholder="Asunto" required class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+    
+            <div class="mb-4">
+                <label for="message" class="block font-bold mb-2">Mensaje:</label>
+                <textarea id="message" name="message" placeholder="Escribe..." required class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+
+            <button class="w-full px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                enviar
+            </button> 
+    
+        </form>
+        
+        <h2 class="text-2xl font-bold my-8">Recursos audiovisuales</h2>
+        <p class="text-gray-700 mb-8">Los recursos audiovisuales utilizados en nuestra aplicación web provienen de diversas fuentes, como bibliotecas de iconos y paquetes de imágenes de alta calidad. En particular, utilizamos iconos de Material Icons, que es una biblioteca de iconos gratuita y de código abierto. Los iconos de Material Icons se distribuyen bajo la Licencia de Apache 2.0, que permite a los usuarios utilizar, modificar y distribuir los iconos con ciertas restricciones. Puede encontrar más información sobre la licencia en el siguiente enlace: <a href="https://github.com/material-icons/material-icons/blob/master/LICENSE" class="text-blue-600 hover:underline">https://github.com/material-icons/material-icons/blob/master/LICENSE</a>.</p>
 </div>
 
 {% endblock main %}

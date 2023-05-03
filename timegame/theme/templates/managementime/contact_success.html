@@ -1,0 +1,23 @@
+{% extends "./base.html" %}
+
+{% block navbar %}
+{% endblock navbar %}
+
+{% block main %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-md shadow-md overflow-hidden">
+      <div class="bg-green-500 px-4 py-2">
+        <h1 class="text-white text-lg font-medium">Mensaje enviado con éxito</h1>
+      </div>
+      <div class="px-4 py-4">
+        <p>Gracias por contactarnos. Tu mensaje ha sido enviado con éxito. Te responderemos lo antes posible.</p>
+      </div>
+    <a href="{% url 'ayuda' %}" class="text-white text-lg font-medium">
+        <div class="bg-green-500 px-4 py-2 hover:bg-green-400">
+            <p class="tracking-widest uppercase">volver</p>
+        </div>
+        </a>
+    </div>
+  </div>
+
+{% endblock main %}
