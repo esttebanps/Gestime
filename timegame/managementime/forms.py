@@ -8,65 +8,65 @@ from datetime import datetime
 from .models import *
 
 #Formulario Django para crear/actualizar instancias de TiempoJuego con campos personalizados y widgets de entrada de datos personalizados.
-class TiempoJuegoForm(forms.ModelForm):
-    hora_fin = forms.TimeField(required=False, widget=forms.TimeInput(attrs={'type': 'time', 'step': 60, 'format': '%H:%M', 'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
+class GameTimeForm(forms.ModelForm):
+    end_time = forms.TimeField(required=False, widget=forms.TimeInput(attrs={'type': 'time', 'step': 60, 'format': '%H:%M', 'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
     
     class Meta:
-        model = TiempoJuego
-        fields = ['consola', 'horas', 'minutos','hora_fin','control_extra', 'is_completed','is_active']
+        model = GameTime
+        fields = ['console', 'hours', 'minutes','end_time','extra_controller', 'is_completed','is_active']
         required = {
-            'horas': True,
-            'minutos': True,
-            'hora_fin': False,
+            'hours': True,
+            'minutes': True,
+            'end_time': False,
         }
         widgets = {
-            'consola': forms.Select(attrs={'class': 'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline'}),
-            'horas': forms.NumberInput(attrs={'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-amber-400', 'placeholder':'Horas', 'value':'0'}),
-            'minutos': forms.NumberInput(attrs={'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Minutos', 'value':'0'}),
-            'control_extra': forms.NumberInput(attrs={'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Cantidad de controles extra'}),
+            'console': forms.Select(attrs={'class': 'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline'}),
+            'hours': forms.NumberInput(attrs={'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-amber-400', 'placeholder':'Horas', 'value':'0'}),
+            'minutes': forms.NumberInput(attrs={'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Minutos', 'value':'0'}),
+            'extra_controller': forms.NumberInput(attrs={'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Cantidad de controles extra'}),
             'is_completed': CheckboxInput(attrs={'class':'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}),
             'is_active': CheckboxInput(attrs={'class':'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}),
         }
     def clean(self):
         cleaned_data = super().clean()
-        horas = cleaned_data.get('horas')
-        minutos = cleaned_data.get('minutos')
-        control_extra = cleaned_data.get('control_extra')
+        hours = cleaned_data.get('hours')
+        minutes = cleaned_data.get('minutes')
+        extra_controller = cleaned_data.get('extra_controller')
             
-        if horas < 0 or minutos < 0 or minutos > 60:
+        if hours < 0 or minutes < 0 or minutes > 60:
             raise forms.ValidationError('El valor de horas o minutos es inválido.')
-        if control_extra > 3:
+        if extra_controller > 3:
             raise forms.ValidationError('El número de controles extra no puede ser mayor a 3.')
 
-        while minutos >= 60:
-            horas += 1
-            minutos -= 60
+        while minutes >= 60:
+            hours += 1
+            minutes -= 60
 
-        cleaned_data['horas'] = horas
-        cleaned_data['minutos'] = minutos
+        cleaned_data['hours'] = hours
+        cleaned_data['minutes'] = minutes
         return cleaned_data
 
 #Formulario Django para crear/actualizar instancias de Consola con un campo nombre y un widget personalizado TextInput.
-class consolaForm(forms.ModelForm):
+class ConsoleForm(forms.ModelForm):
     class Meta:
-        model = Consola
+        model = Console
         fields = '__all__'
         widgets= {
-            'nombre': forms.TextInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Nombre'})
+            'name': forms.TextInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Nombre'})
         }
 
 #Formulario Django para filtrar registros en un rango de fechas, con validación de fecha inicial no mayor que la final.
-class ReporteForm(forms.Form):
-    fecha_inicial = forms.DateField(label='Fecha inicial', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
-    fecha_final = forms.DateField(label='Fecha final', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
-    consola = forms.ModelChoiceField(queryset=Consola.objects.all(), required=False, widget=forms.Select(attrs={'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
+class ReportForm(forms.Form):
+    start_date = forms.DateField(label='Fecha inicial', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
+    end_date = forms.DateField(label='Fecha final', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
+    console = forms.ModelChoiceField(queryset=Console.objects.all(), required=False, widget=forms.Select(attrs={'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
     
     def clean(self):
         cleaned_data = super().clean()
-        fecha_inicial = cleaned_data.get('fecha_inicial')
-        fecha_final = cleaned_data.get('fecha_final')
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
 
-        if fecha_inicial and fecha_final and fecha_inicial >= fecha_final:
+        if start_date and end_date and start_date >= end_date:
             raise forms.ValidationError('La fecha inicial no puede ser mayor o igual que la fecha final.')
 
 #Formulario de registro de usuario personalizado en Django con campos de correo electrónico, nombre de usuario, contraseña y confirmación de contraseña.
@@ -139,4 +139,3 @@ class BackupForm(forms.Form):
             if not backup_file.name.endswith('.json'):
                 raise forms.ValidationError('El archivo debe estar en formato JSON')
         return backup_file
-    

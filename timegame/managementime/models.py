@@ -3,30 +3,29 @@ from django.db import models
 
 
 
-class Consola(models.Model):
-    nombre = models.CharField(max_length=100)
+class Console(models.Model):
+    name = models.CharField(max_length=100)
     
     def __str__(self):
-        return self.nombre
+        return self.name
 
-class TiempoJuego(models.Model):
-    consola = models.ForeignKey(Consola,null=True, on_delete=models.SET_NULL)
-    horas = models.IntegerField(blank=True, null=True)
-    minutos = models.IntegerField(blank=True, null=True)
-    hora_inicio = models.TimeField(null=True)
-    hora_fin = models.TimeField(blank=True, null=True)
-    control_extra = models.IntegerField(default=0)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
+class GameTime(models.Model):
+    console = models.ForeignKey(Console,null=True, on_delete=models.SET_NULL)
+    hours = models.IntegerField(blank=True, null=True)
+    minutes = models.IntegerField(blank=True, null=True)
+    start_time = models.TimeField(null=True)
+    end_time = models.TimeField(blank=True, null=True)
+    extra_controller = models.IntegerField(default=0)
+    created_time = models.DateTimeField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
     is_active = models.BooleanField()
-    
 
-class Precio(models.Model):
-    tiempo_juego = models.OneToOneField(TiempoJuego, on_delete=models.CASCADE)
-    costo_control = models.IntegerField(default=0)
-    costo_tiempo = models.IntegerField(default=0)
-    costo_total = models.IntegerField(default=0)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
+class Price(models.Model):
+    game_time = models.OneToOneField(GameTime, on_delete=models.CASCADE)
+    controller_cost = models.IntegerField(default=0)
+    time_cost = models.IntegerField(default=0)
+    total_cost = models.IntegerField(default=0)
+    created_time = models.DateTimeField(auto_now_add=True)
 
 
 

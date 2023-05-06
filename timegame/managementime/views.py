@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import F, Sum
 from requests import request
 from .forms import *
-from .models import Consola, TiempoJuego, Precio
+from .models import Console, GameTime, Price
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseServerError
 from django.template.loader import render_to_string
@@ -26,65 +26,65 @@ from django.conf import settings
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class index(ListView):
     template_name = 'managementime/inicio.html'
-    model = TiempoJuego
+    model = GameTime
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('precio')
-        queryset = queryset.filter(fecha_creacion__date = datetime.now())
+        queryset = super().get_queryset().select_related('price')
+        queryset = queryset.filter(created_time__date = datetime.now())
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        total_horas = context['object_list'].aggregate(total_horas=Sum('horas'))['total_horas']
-        total_minutos = context['object_list'].aggregate(total_minutos=Sum('minutos'))['total_minutos']
-        costo_tiempo = context['object_list'].aggregate(costo_tiempo=Sum('precio__costo_tiempo'))['costo_tiempo']
-        costo_control = context['object_list'].aggregate(costo_control=Sum('precio__costo_control'))['costo_control']
-        control_extra = context['object_list'].aggregate(control_extra=Sum('control_extra'))['control_extra']
+        hours_total = context['object_list'].aggregate(hours_total=Sum('hours'))['hours_total']
+        minutes_total = context['object_list'].aggregate(minutes_total=Sum('minutes'))['minutes_total']
+        time_cost = context['object_list'].aggregate(time_cost=Sum('price__time_cost'))['time_cost']
+        controller_cost = context['object_list'].aggregate(controller_cost=Sum('price__controller_cost'))['controller_cost']
+        extra_controller = context['object_list'].aggregate(extra_controller=Sum('extra_controller'))['extra_controller']
 
         # Sumar los minutos a las horas cuando los minutos superan los 60
-        if total_minutos:
-            total_horas += total_minutos // 60
-            total_minutos = total_minutos % 60
+        if minutes_total:
+            hours_total += minutes_total // 60
+            minutes_total = minutes_total % 60
 
-        if costo_tiempo:
-            costo_total = costo_tiempo + costo_control
+        if time_cost:
+            total_cost = time_cost + controller_cost
         else:
-            total_horas = 0
-            total_minutos = 0
-            costo_tiempo = 0
-            costo_control = 0
-            control_extra = 0
-            costo_total = 0
+            hours_total = 0
+            minutes_total = 0
+            time_cost = 0
+            controller_cost = 0
+            extra_controller = 0
+            total_cost = 0
 
         context.update({
-            'total_horas': total_horas,
-            'total_minutos': total_minutos,
-            'costo_tiempo': costo_tiempo,
-            'costo_control': costo_control,
-            'costo_total': costo_total,
-            'control_extra': control_extra,
+            'hours_total': hours_total,
+            'minutes_total': minutes_total,
+            'time_cost': time_cost,
+            'controller_cost': controller_cost,
+            'total_cost': total_cost,
+            'extra_controller': extra_controller,
         })
         return context
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class TiempoJuegoCreateView(CreateView):
+class GameTimeCreateView(CreateView):
     template_name = 'managementime/tiempojuego_form.html'
-    model = TiempoJuego
-    form_class = TiempoJuegoForm
+    model = GameTime
+    form_class = GameTimeForm
     success_url = '/lista/'
 
     def form_valid(self, form):
         """
         Obtener la instancia de TiempoJuego a partir del formulario.
         """
-        tiempo_juego = form.save(commit=False)
+        game_time = form.save(commit=False)
         
         """
         Este código obtiene la hora actual y la asigna al campo "hora_inicio" de una instancia de TiempoJuego.
         """
         now = datetime.now()
-        hora_inicio = time(hour=now.hour, minute=now.minute, second=now.second)
-        tiempo_juego.hora_inicio = hora_inicio
+        start_time = time(hour=now.hour, minute=now.minute, second=now.second)
+        game_time.start_time = start_time
         
         """
         Este fragmento verifica si se proporcionaron las horas y los minutos para calcular la hora de finalización 
@@ -94,61 +94,61 @@ class TiempoJuegoCreateView(CreateView):
         Si no se proporcionó ni la hora de finalización ni las horas y minutos, 
         establece la hora de finalización en 00:00:00 y las horas y minutos en 0.
         """
-        if tiempo_juego.horas is not None and tiempo_juego.minutos is not None:
-            delta = timedelta(hours=tiempo_juego.horas, minutes=tiempo_juego.minutos)
-            hora_fin = (datetime.combine(date.today(), hora_inicio) + delta).time()
-            tiempo_juego.hora_fin = hora_fin
-        elif tiempo_juego.hora_fin is not None: 
-            hora_fin = tiempo_juego.hora_fin
-            datetime1 = datetime.datetime.combine(date.today(), hora_inicio)    
-            datetime2 = datetime.datetime.combine(date.today(), hora_fin)
-            hora_fin = datetime2 - datetime1
-            tiempo_juego.horas = hora_fin.seconds // 3600
-            tiempo_juego.minutos = (hora_fin.seconds // 60) % 60
+        if game_time.hours is not None and game_time.minutes is not None:
+            delta = timedelta(hours=game_time.hours, minutes=game_time.minutes)
+            end_time = (datetime.combine(date.today(), start_time) + delta).time()
+            game_time.end_time = end_time
+        elif game_time.end_time is not None: 
+            end_time = game_time.end_time
+            datetime1 = datetime.datetime.combine(date.today(), start_time)    
+            datetime2 = datetime.datetime.combine(date.today(), end_time)
+            end_time = datetime2 - datetime1
+            game_time.hours = end_time.seconds // 3600
+            game_time.minutes = (end_time.seconds // 60) % 60
         else:
-            tiempo_juego.horas = 0
-            tiempo_juego.minutos = 0 
-            tiempo_juego.hora_fin = datetime.time(hour=0, minute=0, second=0)
+            game_time.hours = 0
+            game_time.minutes = 0 
+            game_time.end_time = datetime.time(hour=0, minute=0, second=0)
         
-        tiempo_juego.save()
-        #print(f"resultado despues de guardar: {tiempo_juego.horas}, {tiempo_juego.minutos}")
+        game_time.save()
+        #print(f"resultado despues de guardar: {game_time.hours}, {game_time.minutes}")
         
         """
         Este fragmento calcula el costo del tiempo de juego y el costo adicional por control extra 
         en función de los datos del formulario y crea un objeto Precio asociado a un objeto TiempoJuego.
         """
-        control_extra = form.cleaned_data['control_extra']
+        extra_controller = form.cleaned_data['extra_controller']
         
-        if control_extra is not None:
-            costo_control = control_extra * 500
-        horasc = tiempo_juego.horas
-        minutosc = tiempo_juego.minutos
-        costo_tiempo = (horasc * 60 + minutosc) * 50
-        costo_total = costo_control + costo_tiempo
+        if extra_controller is not None:
+            controller_cost = extra_controller * 500
+        hoursc = game_time.hours
+        minutesc = game_time.minutes
+        time_cost = (hoursc * 60 + minutesc) * 50
+        total_cost = controller_cost + time_cost
         
-        precio = Precio()
-        precio.costo_control = costo_control
-        precio.costo_tiempo = costo_tiempo
-        precio.costo_total = costo_total
+        price = Price()
+        price.controller_cost = controller_cost
+        price.time_cost = time_cost
+        price.total_cost = total_cost
         
-        precio.tiempo_juego = tiempo_juego
-        precio.save()
+        price.game_time = game_time
+        price.save()
         messages.success(self.request,'La operación se ha completado con éxito.')
         
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class TiempoJuegoUpdateView(UpdateView):
+class GameTimeUpdateView(UpdateView):
     template_name = 'managementime/tiempojuego_form.html'
-    model = TiempoJuego
-    form_class = TiempoJuegoForm
+    model = GameTime
+    form_class = GameTimeForm
     success_url = '/lista/'
 
     def form_valid(self, form):
         """
         Obtener la instancia de TiempoJuego a partir del formulario.
         """
-        tiempo_juego = form.save(commit=False)
+        game_time = form.save(commit=False)
         
         """
         Este fragmento verifica si se proporcionaron las horas y los minutos para calcular la hora de finalización 
@@ -158,161 +158,161 @@ class TiempoJuegoUpdateView(UpdateView):
         Si no se proporcionó ni la hora de finalización ni las horas y minutos, 
         establece la hora de finalización en 00:00:00 y las horas y minutos en 0.
         """
-        if 'horas' in form.changed_data or 'minutos' in form.changed_data:
+        if 'hours' in form.changed_data or 'minutes' in form.changed_data:
             # El usuario cambió la cantidad de horas o minutos, por lo que necesitamos recalcular la hora de finalización
-            hora_inicio = tiempo_juego.hora_inicio
-            if tiempo_juego.horas is not None and tiempo_juego.minutos is not None:
-                delta = timedelta(hours=tiempo_juego.horas, minutes=tiempo_juego.minutos)
-                hora_fin = (datetime.combine(date.today(), hora_inicio) + delta).time()
-                tiempo_juego.hora_fin = hora_fin
+            start_time = game_time.start_time
+            if game_time.hours is not None and game_time.minutes is not None:
+                delta = timedelta(hours=game_time.hours, minutes=game_time.minutes)
+                end_time = (datetime.combine(date.today(), start_time) + delta).time()
+                game_time.end_time = end_time
             else:
                 # Si no se proporcionaron las horas y los minutos, establecemos la hora de finalización en 00:00:00 y las horas y minutos en 0.
-                tiempo_juego.horas = 0
-                tiempo_juego.minutos = 0 
-                tiempo_juego.hora_fin = datetime.time(hour=0, minute=0, second=0)
+                game_time.hours = 0
+                game_time.minutes = 0 
+                game_time.end_time = datetime.time(hour=0, minute=0, second=0)
         
         
-        if 'hora_fin' in form.changed_data:
-            hora_inicio = tiempo_juego.hora_inicio
-            hora_fin = tiempo_juego.hora_fin
-            if hora_inicio and hora_fin:
-                tiempo_jugado = datetime.combine(date.today(), hora_fin) - datetime.combine(date.today(), hora_inicio)
-                tiempo_juego.horas = tiempo_jugado.seconds // 3600
-                tiempo_juego.minutos = (tiempo_jugado.seconds // 60) % 60
-                precio = Precio.objects.first()  # Obtener el objeto Precio correspondiente
-                precio_total = precio.costo_tiempo * tiempo_juego.horas  # Calcular el precio total
-                tiempo_juego.precio_total = precio_total  # Actualizar el precio total en el objeto TiempoJuego
+        if 'end_time' in form.changed_data:
+            start_time = game_time.start_time
+            end_time = game_time.end_time
+            if start_time and end_time:
+                played_time = datetime.combine(date.today(), end_time) - datetime.combine(date.today(), start_time)
+                game_time.hours = played_time.seconds // 3600
+                game_time.minutes = (played_time.seconds // 60) % 60
+                price = Price.objects.first()  # Obtener el objeto Precio correspondiente
+                total_price = price.time_cost * game_time.hours  # Calcular el precio total
+                game_time.total_price = total_price  # Actualizar el precio total en el objeto TiempoJuego
             else:
-                tiempo_juego.horas = None
-                tiempo_juego.minutos = None
-                tiempo_juego.precio_total = None
+                game_time.hours = None
+                game_time.minutes = None
+                game_time.total_price = None
         
-        precio = tiempo_juego.precio
-        control_extra = form.cleaned_data['control_extra']
-        if control_extra is not None:
-            costo_control = control_extra * 500
-        horasc = tiempo_juego.horas
-        minutosc = tiempo_juego.minutos
-        costo_tiempo = (horasc * 60 + minutosc) * 50
-        costo_total = costo_control + costo_tiempo
+        price = game_time.price
+        extra_controller = form.cleaned_data['extra_controller']
+        if extra_controller is not None:
+            controller_cost = extra_controller * 500
+        hoursc = game_time.hours
+        minutesc = game_time.minutes
+        time_cost = (hoursc * 60 + minutesc) * 50
+        total_cost = controller_cost + time_cost
                 
-        precio.costo_control = costo_control
-        precio.costo_tiempo = costo_tiempo
-        precio.costo_total = costo_total
-        precio.save()
+        price.controller_cost = controller_cost
+        price.time_cost = time_cost
+        price.total_cost = total_cost
+        price.save()
             
-        tiempo_juego.save()
+        game_time.save()
         messages.success(self.request,'Los cambios se han guardado exitosamente.')
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class TiempoJuegoListView(ListView):
-    model = TiempoJuego
+class GameTimeListView(ListView):
+    model = GameTime
     template_name = 'managementime/ver_tiempos_de_juego.html'
-    context_object_name = 'TiempoJuegoList'
+    context_object_name = 'GameTimeList'
     
     def get_queryset(self):
-        queryset = super().get_queryset().filter(fecha_creacion__date = datetime.now())
+        queryset = super().get_queryset().filter(created_time__date = datetime.now())
         queryset = queryset.annotate(
-            costo_control=F('precio__costo_control'),
-            costo_tiempo=F('precio__costo_tiempo'),
-            costo_total=F('precio__costo_total')
-        ).order_by('hora_fin')
+            controller_cost=F('price__controller_cost'),
+            time_cost=F('price__time_cost'),
+            total_cost=F('price__total_cost')
+        ).order_by('end_time')
         return queryset
 
 @login_required
-@permission_required('managementime.delete_tiempojuego')
-def TiempoJuegoDeleteView(request, pk):
-    usuario = get_object_or_404(TiempoJuego, pk=pk)
-    usuario.delete()
+@permission_required('managementime.delete_gametime')
+def GameTimeDeleteView(request, pk):
+    game_time = get_object_or_404(GameTime, pk=pk)
+    game_time.delete()
     return redirect(to='lista')
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class ConsolaCreateView(PermissionRequiredMixin,CreateView):
-    model = Consola
-    form_class = consolaForm
-    permission_required = 'managementime.add_consola'
+class ConsoleCreateView(PermissionRequiredMixin,CreateView):
+    model = Console
+    form_class = ConsoleForm
+    permission_required = 'managementime.add_console'
     template_name = 'managementime/consola_form.html'
     success_url = '/ver-consola/'
     
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class VerConsolaListView(ListView):
-    model = Consola
+class ConsoleListView(ListView):
+    model = Console
     template_name = 'managementime/ver_consola.html'
-    context_object_name = 'VerConsolaList'
+    context_object_name = 'ConsoleList'
 
 @login_required
-@permission_required('managementime.delete_consola')
-def ConsolaDeleteView(request, pk):
-    usuario = get_object_or_404(Consola, pk=pk)
-    usuario.delete()
+@permission_required('managementime.delete_console')
+def ConsoleDeleteView(request, pk):
+    console = get_object_or_404(Console, pk=pk)
+    console.delete()
     return redirect(to='ver_consolas')
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class ConsolaUpdateView(PermissionRequiredMixin,UpdateView):
+class ConsoleUpdateView(PermissionRequiredMixin,UpdateView):
     template_name = 'managementime/consola_form.html'
-    model = Consola
-    form_class = consolaForm
-    permission_required = 'managementime.update_consola'
+    model = Console
+    form_class = ConsoleForm
+    permission_required = 'managementime.update_console'
     success_url = '/ver-consola/'
 
     def form_valid(self, form):
-        Consola.save
+        Console.save
         messages.success(self.request,'Modificado correctamente')
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class RegistrosPorRangoFechasView(TemplateView):
+class DateRangeRecordsView(TemplateView):
     template_name = 'managementime/registros_por_rango_fechas.html'
-    form_class = ReporteForm
+    form_class = ReportForm
     
     def get_queryset(self):
-        queryset = TiempoJuego.objects.filter(fecha_creacion__date=timezone.now())
+        queryset = GameTime.objects.filter(created_time__date=timezone.now())
         queryset = queryset.annotate(
-            costo_control=F('precio__costo_control'),
-            costo_tiempo=F('precio__costo_tiempo'),
-            costo_total=F('precio__costo_total'),
-            precio_id=F('precio__id')
-        ).select_related('precio').order_by('hora_fin')
+            controller_cost=F('price__controller_cost'),
+            time_cost=F('price__time_cost'),
+            total_cost=F('price__total_cost'),
+            price_id=F('price__id')
+        ).select_related('price').order_by('end_time')
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.form_class(self.request.GET or None)
-        context['registros'] = []
+        context['records'] = []
 
         if self.request.GET and context['form'].is_valid():
-            fecha_inicial = context['form'].cleaned_data['fecha_inicial']
-            fecha_final = context['form'].cleaned_data['fecha_final']
-            consola = context['form'].cleaned_data.get('consola')
+            start_date = context['form'].cleaned_data['start_date']
+            end_date = context['form'].cleaned_data['end_date']
+            console = context['form'].cleaned_data.get('console')
             
-            registros = TiempoJuego.objects.filter(fecha_creacion__range=(fecha_inicial, fecha_final)).select_related('precio')
+            records = GameTime.objects.filter(created_time__range=(start_date, end_date)).select_related('price')
 
-            if consola:
-                registros = registros.filter(consola=consola)
+            if console:
+                records = records.filter(console=console)
             
             # Agregar precios a cada registro
-            for registro in registros:
-                registro.costo_control = registro.precio.costo_control
-                registro.costo_tiempo = registro.precio.costo_tiempo
-                registro.costo_total = registro.precio.costo_total
-                registro.precio_id = registro.precio.id
+            for record in records:
+                record.controller_cost = record.price.controller_cost
+                record.time_cost = record.price.time_cost
+                record.total_cost = record.price.total_cost
+                record.price_id = record.price.id
 
-            context['registros'] = registros
+            context['records'] = records
 
         # Calcular el total de costo
-            total_costo = registros.aggregate(total=Sum('precio__costo_total'))['total']
-            context['total_costo'] = total_costo
+            total_cost = records.aggregate(total=Sum('price__total_cost'))['total']
+            context['total_cost'] = total_cost
 
-            total_horas_minutos = registros.aggregate(total_horas=Sum('horas'), total_minutos=Sum('minutos'))
+            minutes_hours_total = records.aggregate(total_hours=Sum('hours'), total_minutes=Sum('minutes'))
 
         # Sumar los minutos adicionales a las horas
-            horas_extra, minutos = divmod(total_horas_minutos['total_minutos'], 60)
-            total_horas_minutos['total_horas'] += horas_extra
-            total_horas_minutos['total_minutos'] = minutos
+            extra_hours, minutes = divmod(minutes_hours_total['total_minutes'], 60)
+            minutes_hours_total['total_hours'] += extra_hours
+            minutes_hours_total['total_minutes'] = minutes
 
-            context['total_horas'] = total_horas_minutos['total_horas']
-            context['total_minutos'] = total_horas_minutos['total_minutos']
+            context['total_hours'] = minutes_hours_total['total_hours']
+            context['total_minutes'] = minutes_hours_total['total_minutes']
         return context
 
 #autenticacion de usuraios
@@ -331,18 +331,18 @@ class SignUpView(PermissionRequiredMixin,CreateView):
     template_name = 'registration/signup.html'
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class TerminosView(TemplateView):
+class TermsConditionsView(TemplateView):
     template_name = "managementime/terminos.html"
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class BackupView(View):
     def get(self, request):
-        tiempo_juegos = TiempoJuego.objects.all()
-        consolas = Consola.objects.all()
-        precios = Precio.objects.all()
+        games_times = GameTime.objects.all()
+        consoles = Console.objects.all()
+        prices = Price.objects.all()
 
         # Concatenamos los tres conjuntos de objetos en una sola lista
-        data = list(chain(tiempo_juegos, consolas, precios))
+        data = list(chain(games_times, consoles, prices))
 
         # Serializamos la lista completa
         data = serializers.serialize('json', data)
@@ -375,7 +375,7 @@ class RestoreView(FormView):
         return super().form_invalid(form)
 
 
-class AyudaView(View):
+class HelpView(View):
     template_name = 'managementime/ayuda.html'
     success_template_name = 'managementime/contact_success.html'
 
