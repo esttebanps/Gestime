@@ -7,47 +7,46 @@
 {% block main %}
 
 
-<div class="flex flex-col md:flex-row justify-around items-center bg-gray-100">
-    <div class="p-4 md:p-0 md:flex flex-col items-center justify-center md:w-2/5 bg-white rounded-lg shadow-lg mb-4">
+<div class="flex flex-col px-8 md:flex-col">
+    <div class="p-4 md:p-0 md:flex flex-col md:bg-white rounded-lg mb-4">
         <h2 class="text-xl font-bold mb-4">¡Mantén tus datos seguros!</h2>
-        <p class="text-gray-700 text-lg text-center mb-4">Haz clic en el botón para crear una copia de seguridad de tus datos.</p>
+        <p class="text-gray-700 text-lg mb-4">Para garantizar la seguridad de tus datos, te recomendamos generar una copia de seguridad regularmente. Una copia de seguridad puede protegerte de posibles pérdidas de datos y restaurar rápidamente tu información en caso de cualquier imprevisto. Haz clic en el botón "Generar copia de seguridad" para crear una copia de tus datos importantes y asegurarte de que siempre estén protegidos. Recuerda guardar la copia de seguridad en un lugar seguro para evitar que sea accesible para otros.</p>
         <a href="{% url 'backup' %}">
-            <button class="w-full m-4 md:w-auto px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+            <button class="w-full my-4 md:w-auto px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
                 Guardar una copia de seguridad
             </button>
         </a>
     </div>      
-    <form class="w-full md:w-2/5 h-full bg-white rounded-lg shadow-lg mb-4 px-4 md:px-8 pt-6 pb-8" method="post" enctype="multipart/form-data">
+    <form class="p-4 md:p-0 md:flex flex-col md:bg-white rounded-lg mb-4" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <h2 class="text-xl font-bold mb-4">Recupera tus datos y no pierdas el ritmo del juego</h2>
-
-        <div class="mb-4">
-            <label class="flex flex-col items-center justify-center w-full h-48 rounded-lg border-2 border-gray-400 hover:border-yellow hover:text-yellow cursor-pointer">
-                <input class="hidden" id="backup_file" name="backup_file" type="file" required>
-                <ion-icon class="text-2xl" name="file-tray-full-outline"></ion-icon>
-                <span class="text-center md:mt-2 text-base leading-normal text-gray-500">Selecciona el archivo de copia de la seguridad</span>
-            </label>
-        </div>
-        <div class="flex items-center justify-between mb-8">
-            <button class="w-full md:w-full px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                restaurar
-            </button> 
-        </div>
-        
-        {% if form.errors %}
-                <div class="w-full bg-red-100 border border-red-400 text-red-700 mt-4 px-4 py-3 rounded relative" role="alert">
-                    <strong class="font-bold">Error:</strong>
-                    <span class="block sm:inline">Se han encontrado los siguientes errores en el formulario:</span>
-                    <ul class="mt-2 list-disc list-inside">
-                        {% for field_errors in form.errors.values %}
-                            {% for error in field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                    </ul>
+        <p class="text-gray-700 text-lg mb-4">Para restaurar tus datos desde una copia de seguridad, selecciona el archivo de copia de seguridad y haz clic en el botón "Restaurar". Esto te permitirá recuperar rápidamente tus datos perdidos o dañados. Asegúrate de haber seleccionado el archivo correcto de copia de seguridad y de que el archivo no esté dañado o corrupto.</p>
+        <div class="mb-4 flex justify-center">
+            <div class="">
+                <label class="flex flex-col items-center justify-center w-96 h-48 rounded-lg border-2 border-gray-400 hover:border-yellow hover:text-yellow cursor-pointer">
+                    <input class="hidden" id="backup_file" name="backup_file" type="file" required>
+                    <ion-icon class="text-2xl" name="file-tray-full-outline"></ion-icon>
+                    <span class="text-center md:mt-2 text-base leading-normal text-gray-500">Selecciona el archivo de copia de la seguridad</span>
+                </label>
+                <div class="mb-8">
+                    <button class="w-full my-8 md:px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                        restaurar
+                    </button> 
                 </div>
-                {% endif %}
+            </div>
+        </div>
+        {% if form.errors %}
+            <div class="w-full bg-red-100 border border-red-400 text-red-700 mt-4 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error:</strong>
+                <span class="block sm:inline">Se han encontrado los siguientes errores en el formulario:</span>
+                <ul class="mt-2 list-disc list-inside">
+                    {% for field_errors in form.errors.values %}
+                        {% for error in field_errors %}                                <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     </form>  
 </div>
-
 {% endblock %}

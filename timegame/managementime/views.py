@@ -1,36 +1,45 @@
-import datetime
-from datetime import date, timedelta, time
-import json
+# Django imports
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.views import LoginView
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
-from django.views import View
-from django.views.generic import ListView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView, FormView
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.contrib.auth.views import LoginView
+from django.core import serializers
+from django.core.mail import send_mail
 from django.db.models import F, Sum
-from requests import request
+from django.http import HttpResponse, HttpResponseServerError
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import (
+    CreateView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    )
+from django.views.generic.edit import FormView, UpdateView
 from .forms import *
 from .models import Console, GameTime, Price
-from django.core import serializers
-from django.http import HttpResponse, HttpResponseServerError
-from django.template.loader import render_to_string
-from itertools import chain
-from django.core.mail import send_mail
-from django.conf import settings
+from .utils import *
 
-#Este código define una vista basada en clase que renderiza una plantilla HTML e incluye información de un modelo TiempoJuego, como el total de horas, minutos, costo de tiempo y control, y costo total.
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+# Python imports
+import datetime
+import json
+from itertools import chain
+from requests import request
+from datetime import datetime, date, time, timedelta
+
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
 class index(ListView):
     template_name = 'managementime/inicio.html'
     model = GameTime
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related('price')
-        queryset = queryset.filter(created_time__date = datetime.now())
+        queryset = queryset.filter(created_time__date=datetime.now())
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -65,148 +74,40 @@ class index(ListView):
             'extra_controller': extra_controller,
         })
         return context
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class GameTimeCreateView(CreateView):
+class GameTimeCreateView(LoginRequiredMixin, CreateView):
+    """
+    View for creating a new GameTime instance.
+    """
+    login_url = reverse_lazy('login')
     template_name = 'managementime/tiempojuego_form.html'
     model = GameTime
     form_class = GameTimeForm
-    success_url = '/lista/'
+    success_url = reverse_lazy('lista')
 
     def form_valid(self, form):
         """
-        Obtener la instancia de TiempoJuego a partir del formulario.
+        Process the form and save the new GameTime instance.
         """
+        
         game_time = form.save(commit=False)
-        
-        """
-        Este código obtiene la hora actual y la asigna al campo "hora_inicio" de una instancia de TiempoJuego.
-        """
-        now = datetime.now()
-        start_time = time(hour=now.hour, minute=now.minute, second=now.second)
-        game_time.start_time = start_time
-        
-        """
-        Este fragmento verifica si se proporcionaron las horas y los minutos para calcular la hora de finalización 
-        y si es así, lo calcula.
-        Si no se proporcionaron las horas y los minutos pero se proporcionó la hora de finalización,
-        calcula la duración y actualiza las horas y minutos. 
-        Si no se proporcionó ni la hora de finalización ni las horas y minutos, 
-        establece la hora de finalización en 00:00:00 y las horas y minutos en 0.
-        """
-        if game_time.hours is not None and game_time.minutes is not None:
-            delta = timedelta(hours=game_time.hours, minutes=game_time.minutes)
-            end_time = (datetime.combine(date.today(), start_time) + delta).time()
-            game_time.end_time = end_time
-        elif game_time.end_time is not None: 
-            end_time = game_time.end_time
-            datetime1 = datetime.datetime.combine(date.today(), start_time)    
-            datetime2 = datetime.datetime.combine(date.today(), end_time)
-            end_time = datetime2 - datetime1
-            game_time.hours = end_time.seconds // 3600
-            game_time.minutes = (end_time.seconds // 60) % 60
-        else:
-            game_time.hours = 0
-            game_time.minutes = 0 
-            game_time.end_time = datetime.time(hour=0, minute=0, second=0)
-        
-        game_time.save()
-        #print(f"resultado despues de guardar: {game_time.hours}, {game_time.minutes}")
-        
-        """
-        Este fragmento calcula el costo del tiempo de juego y el costo adicional por control extra 
-        en función de los datos del formulario y crea un objeto Precio asociado a un objeto TiempoJuego.
-        """
         extra_controller = form.cleaned_data['extra_controller']
-        
-        if extra_controller is not None:
-            controller_cost = extra_controller * 500
-        hoursc = game_time.hours
-        minutesc = game_time.minutes
-        time_cost = (hoursc * 60 + minutesc) * 50
-        total_cost = controller_cost + time_cost
-        
-        price = Price()
-        price.controller_cost = controller_cost
-        price.time_cost = time_cost
-        price.total_cost = total_cost
-        
-        price.game_time = game_time
-        price.save()
+        process_game_time(game_time, extra_controller)
         messages.success(self.request,'La operación se ha completado con éxito.')
-        
         return super().form_valid(form)
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class GameTimeUpdateView(UpdateView):
+class GameTimeUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = '/login/'
     template_name = 'managementime/tiempojuego_form.html'
     model = GameTime
     form_class = GameTimeForm
     success_url = '/lista/'
 
     def form_valid(self, form):
-        """
-        Obtener la instancia de TiempoJuego a partir del formulario.
-        """
         game_time = form.save(commit=False)
-        
-        """
-        Este fragmento verifica si se proporcionaron las horas y los minutos para calcular la hora de finalización 
-        y si es así, lo calcula.
-        Si no se proporcionaron las horas y los minutos pero se proporcionó la hora de finalización,
-        calcula la duración y actualiza las horas y minutos. 
-        Si no se proporcionó ni la hora de finalización ni las horas y minutos, 
-        establece la hora de finalización en 00:00:00 y las horas y minutos en 0.
-        """
-        if 'hours' in form.changed_data or 'minutes' in form.changed_data:
-            # El usuario cambió la cantidad de horas o minutos, por lo que necesitamos recalcular la hora de finalización
-            start_time = game_time.start_time
-            if game_time.hours is not None and game_time.minutes is not None:
-                delta = timedelta(hours=game_time.hours, minutes=game_time.minutes)
-                end_time = (datetime.combine(date.today(), start_time) + delta).time()
-                game_time.end_time = end_time
-            else:
-                # Si no se proporcionaron las horas y los minutos, establecemos la hora de finalización en 00:00:00 y las horas y minutos en 0.
-                game_time.hours = 0
-                game_time.minutes = 0 
-                game_time.end_time = datetime.time(hour=0, minute=0, second=0)
-        
-        
-        if 'end_time' in form.changed_data:
-            start_time = game_time.start_time
-            end_time = game_time.end_time
-            if start_time and end_time:
-                played_time = datetime.combine(date.today(), end_time) - datetime.combine(date.today(), start_time)
-                game_time.hours = played_time.seconds // 3600
-                game_time.minutes = (played_time.seconds // 60) % 60
-                price = Price.objects.first()  # Obtener el objeto Precio correspondiente
-                total_price = price.time_cost * game_time.hours  # Calcular el precio total
-                game_time.total_price = total_price  # Actualizar el precio total en el objeto TiempoJuego
-            else:
-                game_time.hours = None
-                game_time.minutes = None
-                game_time.total_price = None
-        
-        price = game_time.price
-        extra_controller = form.cleaned_data['extra_controller']
-        if extra_controller is not None:
-            controller_cost = extra_controller * 500
-        hoursc = game_time.hours
-        minutesc = game_time.minutes
-        time_cost = (hoursc * 60 + minutesc) * 50
-        total_cost = controller_cost + time_cost
-                
-        price.controller_cost = controller_cost
-        price.time_cost = time_cost
-        price.total_cost = total_cost
-        price.save()
-            
-        game_time.save()
+        update_game_time(game_time,form.changed_data, form.cleaned_data)
         messages.success(self.request,'Los cambios se han guardado exitosamente.')
         return super().form_valid(form)
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class GameTimeListView(ListView):
+class GameTimeListView(LoginRequiredMixin, ListView):
+    login_url = '/login/'
     model = GameTime
     template_name = 'managementime/ver_tiempos_de_juego.html'
     context_object_name = 'GameTimeList'
@@ -219,37 +120,21 @@ class GameTimeListView(ListView):
             total_cost=F('price__total_cost')
         ).order_by('end_time')
         return queryset
-
 @login_required
 @permission_required('managementime.delete_gametime')
 def GameTimeDeleteView(request, pk):
     game_time = get_object_or_404(GameTime, pk=pk)
     game_time.delete()
     return redirect(to='lista')
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class ConsoleCreateView(PermissionRequiredMixin,CreateView):
+class ConsoleCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    login_url = '/login/'
     model = Console
     form_class = ConsoleForm
     permission_required = 'managementime.add_console'
     template_name = 'managementime/consola_form.html'
     success_url = '/ver-consola/'
-    
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class ConsoleListView(ListView):
-    model = Console
-    template_name = 'managementime/ver_consola.html'
-    context_object_name = 'ConsoleList'
-
-@login_required
-@permission_required('managementime.delete_console')
-def ConsoleDeleteView(request, pk):
-    console = get_object_or_404(Console, pk=pk)
-    console.delete()
-    return redirect(to='ver_consolas')
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class ConsoleUpdateView(PermissionRequiredMixin,UpdateView):
+class ConsoleUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    login_url = '/login/'
     template_name = 'managementime/consola_form.html'
     model = Console
     form_class = ConsoleForm
@@ -260,7 +145,17 @@ class ConsoleUpdateView(PermissionRequiredMixin,UpdateView):
         Console.save
         messages.success(self.request,'Modificado correctamente')
         return super().form_valid(form)
-
+class ConsoleListView(LoginRequiredMixin, ListView):
+    login_url = '/login/'
+    model = Console
+    template_name = 'managementime/ver_consola.html'
+    context_object_name = 'ConsoleList'
+@login_required
+@permission_required('managementime.delete_console')
+def ConsoleDeleteView(request, pk):
+    console = get_object_or_404(Console, pk=pk)
+    console.delete()
+    return redirect(to='ver_consolas')
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class DateRangeRecordsView(TemplateView):
     template_name = 'managementime/registros_por_rango_fechas.html'
@@ -307,33 +202,31 @@ class DateRangeRecordsView(TemplateView):
             minutes_hours_total = records.aggregate(total_hours=Sum('hours'), total_minutes=Sum('minutes'))
 
         # Sumar los minutos adicionales a las horas
-            extra_hours, minutes = divmod(minutes_hours_total['total_minutes'], 60)
-            minutes_hours_total['total_hours'] += extra_hours
-            minutes_hours_total['total_minutes'] = minutes
-
+            if minutes_hours_total['total_minutes'] is not None:
+                extra_hours, minutes = divmod(minutes_hours_total['total_minutes'], 60)
+                minutes_hours_total['total_hours'] += extra_hours
+                minutes_hours_total['total_minutes'] = minutes
+            else:
+                minutes_hours_total['total_hours'] = 0
+                minutes_hours_total['total_minutes'] = 0
+            
             context['total_hours'] = minutes_hours_total['total_hours']
             context['total_minutes'] = minutes_hours_total['total_minutes']
         return context
-
-#autenticacion de usuraios
 class CustomLoginView(LoginView):
     template_name = 'managementime/login.html'
 
     def get_success_url(self):
         return reverse_lazy('inicio')
-
-#Registro de usuarios nuevos
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class SignUpView(PermissionRequiredMixin,CreateView):
     form_class = CustomUserCreationForm
     permission_required = 'managementime.add_user'
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
-
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class TermsConditionsView(TemplateView):
     template_name = "managementime/terminos.html"
-
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class BackupView(View):
     def get(self, request):
@@ -351,7 +244,6 @@ class BackupView(View):
         response = HttpResponse(data, content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename="backup-alpha-gamer.json"'
         return response
-
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class RestoreView(FormView):
     template_name = 'managementime/restore.html'
@@ -373,8 +265,6 @@ class RestoreView(FormView):
 
     def form_invalid(self, form):
         return super().form_invalid(form)
-
-
 class HelpView(View):
     template_name = 'managementime/ayuda.html'
     success_template_name = 'managementime/contact_success.html'

@@ -27,21 +27,22 @@ class GameTimeForm(forms.ModelForm):
             'is_completed': CheckboxInput(attrs={'class':'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}),
             'is_active': CheckboxInput(attrs={'class':'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}),
         }
+        
     def clean(self):
         cleaned_data = super().clean()
         hours = cleaned_data.get('hours')
         minutes = cleaned_data.get('minutes')
         extra_controller = cleaned_data.get('extra_controller')
-            
+        
         if hours < 0 or minutes < 0 or minutes > 60:
             raise forms.ValidationError('El valor de horas o minutos es inválido.')
-        if extra_controller > 3:
-            raise forms.ValidationError('El número de controles extra no puede ser mayor a 3.')
+        
+        if extra_controller > 3 or extra_controller < 0:
+            raise forms.ValidationError('El número de controles extra no puede ser mayor a 3 ni menor a 0')
 
         while minutes >= 60:
             hours += 1
             minutes -= 60
-
         cleaned_data['hours'] = hours
         cleaned_data['minutes'] = minutes
         return cleaned_data
@@ -57,8 +58,8 @@ class ConsoleForm(forms.ModelForm):
 
 #Formulario Django para filtrar registros en un rango de fechas, con validación de fecha inicial no mayor que la final.
 class ReportForm(forms.Form):
-    start_date = forms.DateField(label='Fecha inicial', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
-    end_date = forms.DateField(label='Fecha final', widget=forms.TextInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
+    start_date = forms.DateField(label='Fecha inicial', widget=forms.DateInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
+    end_date = forms.DateField(label='Fecha final', widget=forms.DateInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
     console = forms.ModelChoiceField(queryset=Console.objects.all(), required=False, widget=forms.Select(attrs={'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
     
     def clean(self):
@@ -67,7 +68,7 @@ class ReportForm(forms.Form):
         end_date = cleaned_data.get('end_date')
 
         if start_date and end_date and start_date >= end_date:
-            raise forms.ValidationError('La fecha inicial no puede ser mayor o igual que la fecha final.')
+            raise forms.ValidationError('La fecha inicial debe ser anterior a la fecha final.')
 
 #Formulario de registro de usuario personalizado en Django con campos de correo electrónico, nombre de usuario, contraseña y confirmación de contraseña.
 class CustomUserCreationForm(UserCreationForm):
