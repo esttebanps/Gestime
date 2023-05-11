@@ -22,6 +22,9 @@ urlpatterns = [
     #authenticate
     #Registro de usuario
     path('signup/', SignUpView.as_view(), name='signup'),
+    path('users/', UserListView.as_view(), name='users'),
+    path('user-update/<int:pk>/', UserUpdateView.as_view(), name='user_update'),
+    path('user-delete/<int:pk>/', UserDeleteView, name='user_delete'),
     
     #Login
     path('login/', CustomLoginView.as_view(form_class=LoginForm), name='login'),

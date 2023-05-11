@@ -224,6 +224,33 @@ class SignUpView(PermissionRequiredMixin,CreateView):
     permission_required = 'managementime.add_user'
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
+
+@method_decorator(login_required(login_url='/login/'),name='dispatch')
+class UserListView(PermissionRequiredMixin,ListView):
+    model = User
+    permission_required = 'managementime.add_user'
+    template_name = 'managementime/list_user.html'
+    context_object_name = 'user_list'
+@method_decorator(login_required(login_url='/login/'),name='dispatch')
+class UserUpdateView(PermissionRequiredMixin,UpdateView):
+    model = User
+    permission_required = 'managementime.add_user'
+    form_class = CustomUserChangeForm
+    template_name = 'managementime/user_update.html'
+    success_url = reverse_lazy('users')
+    context_object_name = 'user'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Modificado correctamente')
+        return super().form_valid(form)
+
+#@permission_required('managementime.delete_console')
+@login_required
+def UserDeleteView(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user.delete()
+    return redirect(to='users')
+
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
 class TermsConditionsView(TemplateView):
     template_name = "managementime/terminos.html"
