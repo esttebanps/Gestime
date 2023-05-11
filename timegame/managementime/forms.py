@@ -1,6 +1,6 @@
 #Importes de django
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm, UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from django.forms.widgets import *
 #Otros modulos
@@ -96,6 +96,48 @@ class CustomUserCreationForm(UserCreationForm):
         strip=False,
         help_text=("Ingresa la misma contraseña que antes, para verificarla."),
     )
+
+class CustomUserChangeForm(forms.ModelForm):
+    username = forms.CharField(
+        label="Nombre de usuario",
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            'class': 'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline',
+            'placeholder': 'Nombre de usuario'
+        })
+    )
+    email = forms.EmailField(
+        label="Correo electrónico",
+        widget=forms.EmailInput(attrs={
+            'class': 'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline',
+            'placeholder': 'Correo electrónico'
+        })
+    )
+    is_active = forms.BooleanField(
+        label="Cuenta activa",
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+        }),
+        required=False
+    )
+    is_staff = forms.BooleanField(
+        label="Administrador",
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+        }),
+        required=False
+    )
+    is_superuser = forms.BooleanField(
+        label="Superusuario",
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-checkbox text-indigo-600 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+        }),
+        required=False
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'is_active', 'is_staff', 'is_superuser']
 
 #Este es un formulario de inicio de sesión personalizado que hereda de AuthenticationForm. El formulario incluye dos campos para que el usuario ingrese su nombre de usuario y contraseña, con atributos personalizados de HTML y CSS.
 class LoginForm(AuthenticationForm):
