@@ -14,7 +14,7 @@
 <div class="flex flex-col px-8 md:flex-col">
     <div class="p-4 md:p-0 md:flex flex-col md:bg-white rounded-lg mb-4">
         <h2 class="uppercase text-lg font-semibold mb-4">¡Mantén tus datos seguros!</h2>
-        <p class="text-gray-700 text-lg mb-4">Para garantizar la seguridad de tus datos, te recomendamos generar una copia de seguridad regularmente. Una copia de seguridad puede protegerte de posibles pérdidas de datos y restaurar rápidamente tu información en caso de cualquier imprevisto. Haz clic en el botón "Generar copia de seguridad" para crear una copia de tus datos importantes y asegurarte de que siempre estén protegidos. Recuerda guardar la copia de seguridad en un lugar seguro para evitar que sea accesible para otros.</p>
+        <p class="text-gray-700 mb-4">Para garantizar la seguridad de tus datos, te recomendamos generar una copia de seguridad regularmente. Una copia de seguridad puede protegerte de posibles pérdidas de datos y restaurar rápidamente tu información en caso de cualquier imprevisto. Haz clic en el botón "Guardar copia de seguridad" para crear una copia de tus datos importantes y asegurarte de que siempre estén protegidos. Recuerda guardar la copia de seguridad en un lugar seguro para evitar que sea accesible para otros.</p>
         <a href="{% url 'backup' %}">
             <button class="w-full my-4 md:w-auto px-4 py-2 text-lg font-medium tracking-widest text-white uppercase bg-yellow rounded hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200">
                 Guardar una copia de seguridad
@@ -24,7 +24,7 @@
     <form class="p-4 md:p-0 md:flex flex-col md:bg-white rounded-lg mb-4" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <h2 class="uppercase text-lg font-semibold mb-4">Recupera tus datos y no pierdas el ritmo del juego</h2>
-        <p class="text-gray-700 text-lg mb-4">Para restaurar tus datos desde una copia de seguridad, selecciona el archivo de copia de seguridad y haz clic en el botón "Restaurar". Esto te permitirá recuperar rápidamente tus datos perdidos o dañados. Asegúrate de haber seleccionado el archivo correcto de copia de seguridad y de que el archivo no esté dañado o corrupto.</p>
+        <p class="text-gray-700 mb-4">Para restaurar tus datos desde una copia de seguridad, selecciona el archivo de copia de seguridad y haz clic en el botón "Restaurar". Esto te permitirá recuperar rápidamente tus datos perdidos o dañados. Asegúrate de haber seleccionado el archivo correcto de copia de seguridad y de que el archivo no esté dañado o corrupto.</p>
         <div class="mb-4 flex justify-center">
             <div class="">
                 <label class="flex flex-col items-center justify-center w-96 h-48 rounded-lg border-2 border-gray-400 hover:border-yellow hover:text-yellow cursor-pointer">

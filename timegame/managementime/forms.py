@@ -55,11 +55,22 @@ class ConsoleForm(forms.ModelForm):
         widgets= {
             'name': forms.TextInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Nombre'})
         }
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        return name.capitalize()
 
 #Formulario Django para filtrar registros en un rango de fechas, con validación de fecha inicial no mayor que la final.
 class ReportForm(forms.Form):
-    start_date = forms.DateField(label='Fecha inicial', widget=forms.DateInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
-    end_date = forms.DateField(label='Fecha final', widget=forms.DateInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}), initial=datetime.now().date())
+
+    start_date = forms.DateField(
+        label='Fecha inicial',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'})
+    )
+
+    end_date = forms.DateField(
+        label='Fecha final',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'})
+    )
     console = forms.ModelChoiceField(queryset=Console.objects.all(), required=False, widget=forms.Select(attrs={'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
     
     def clean(self):
@@ -72,12 +83,31 @@ class ReportForm(forms.Form):
 
 #Formulario de registro de usuario personalizado en Django con campos de correo electrónico, nombre de usuario, contraseña y confirmación de contraseña.
 class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Correo electronico'}))
 
     class Meta(UserCreationForm.Meta):
         model = User
         fields = UserCreationForm.Meta.fields + ('email',)
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        return username.capitalize()
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+
+        # Verificar si ya existe un usuario con el mismo correo electrónico
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Este correo electrónico ya está en uso.')
+
+        return email
+    
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={
+                'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 
+                'placeholder':'Correo electronico'
+            }))
+    
     username = forms.CharField(
         label=("Nombre de usuario"),
         max_length=30,

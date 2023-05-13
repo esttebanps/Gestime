@@ -6,7 +6,8 @@ from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMix
 from django.contrib.auth.views import LoginView
 from django.core import serializers
 from django.core.mail import send_mail
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Q, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -31,9 +32,10 @@ import json
 from itertools import chain
 from requests import request
 from datetime import datetime, date, time, timedelta
+import datetime as dt
 
-@method_decorator(login_required(login_url='/login/'), name='dispatch')
-class index(ListView):
+class index(LoginRequiredMixin,ListView):
+    login_url = reverse_lazy('login')
     template_name = 'managementime/inicio.html'
     model = GameTime
 
@@ -156,20 +158,10 @@ def ConsoleDeleteView(request, pk):
     console = get_object_or_404(Console, pk=pk)
     console.delete()
     return redirect(to='ver_consolas')
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+
 class DateRangeRecordsView(TemplateView):
     template_name = 'managementime/registros_por_rango_fechas.html'
     form_class = ReportForm
-    
-    def get_queryset(self):
-        queryset = GameTime.objects.filter(created_time__date=timezone.now())
-        queryset = queryset.annotate(
-            controller_cost=F('price__controller_cost'),
-            time_cost=F('price__time_cost'),
-            total_cost=F('price__total_cost'),
-            price_id=F('price__id')
-        ).select_related('price').order_by('end_time')
-        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -180,28 +172,51 @@ class DateRangeRecordsView(TemplateView):
             start_date = context['form'].cleaned_data['start_date']
             end_date = context['form'].cleaned_data['end_date']
             console = context['form'].cleaned_data.get('console')
-            
+
             records = GameTime.objects.filter(created_time__range=(start_date, end_date)).select_related('price')
 
             if console:
                 records = records.filter(console=console)
             
-            # Agregar precios a cada registro
+            total_controller = records.aggregate(total_controller=Sum('extra_controller'))['total_controller']
+            context['total_controller'] = total_controller if total_controller else 0
+            
             for record in records:
                 record.controller_cost = record.price.controller_cost
+                record.extra_controller = record.extra_controller
                 record.time_cost = record.price.time_cost
                 record.total_cost = record.price.total_cost
                 record.price_id = record.price.id
 
+                # Obtén la fecha actual
+                # Obtén la fecha actual
+                fecha_actual = dt.date.today()
+
+                # Crea un objeto datetime.datetime utilizando los valores de hora, minuto y segundo de datetime.time
+                start_datetime = datetime.combine(fecha_actual, datetime.min.time()) + timedelta(hours=record.start_time.hour, minutes=record.start_time.minute, seconds=record.start_time.second)
+                end_datetime = datetime.combine(fecha_actual, datetime.min.time()) + timedelta(hours=record.end_time.hour, minutes=record.end_time.minute, seconds=record.end_time.second)
+                # Calcular tiempo jugado
+                time_played = end_datetime - start_datetime
+
+                # Asegurarse de que los valores de tiempo jugado sean no negativos
+                if time_played < timedelta():
+                    time_played = timedelta()
+
+                record.time_played = time_played
+
             context['records'] = records
 
-        # Calcular el total de costo
             total_cost = records.aggregate(total=Sum('price__total_cost'))['total']
             context['total_cost'] = total_cost
 
+            total_controller_cost = records.aggregate(total_controller_cost=Sum('price__controller_cost'))['total_controller_cost']
+            context['total_controller_cost'] = total_controller_cost
+
+            total_combined = (total_cost if total_cost else 0) + (total_controller_cost if total_controller_cost else 0)
+            context['total_combined'] = total_combined
+
             minutes_hours_total = records.aggregate(total_hours=Sum('hours'), total_minutes=Sum('minutes'))
 
-        # Sumar los minutos adicionales a las horas
             if minutes_hours_total['total_minutes'] is not None:
                 extra_hours, minutes = divmod(minutes_hours_total['total_minutes'], 60)
                 minutes_hours_total['total_hours'] += extra_hours
@@ -209,30 +224,30 @@ class DateRangeRecordsView(TemplateView):
             else:
                 minutes_hours_total['total_hours'] = 0
                 minutes_hours_total['total_minutes'] = 0
-            
+
             context['total_hours'] = minutes_hours_total['total_hours']
             context['total_minutes'] = minutes_hours_total['total_minutes']
+            
         return context
 class CustomLoginView(LoginView):
     template_name = 'managementime/login.html'
 
     def get_success_url(self):
         return reverse_lazy('inicio')
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class SignUpView(PermissionRequiredMixin,CreateView):
+class SignUpView(LoginRequiredMixin,PermissionRequiredMixin,CreateView):
+    login_url='/login/'
     form_class = CustomUserCreationForm
     permission_required = 'managementime.add_user'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('users')
     template_name = 'registration/signup.html'
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class UserListView(PermissionRequiredMixin,ListView):
+class UserListView(LoginRequiredMixin,PermissionRequiredMixin,ListView):
+    login_url='/login/'
     model = User
     permission_required = 'managementime.add_user'
     template_name = 'managementime/list_user.html'
     context_object_name = 'user_list'
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class UserUpdateView(PermissionRequiredMixin,UpdateView):
+class UserUpdateView(LoginRequiredMixin,PermissionRequiredMixin,UpdateView):
+    login_url='/login/'
     model = User
     permission_required = 'managementime.add_user'
     form_class = CustomUserChangeForm
@@ -243,19 +258,17 @@ class UserUpdateView(PermissionRequiredMixin,UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Modificado correctamente')
         return super().form_valid(form)
-
-#@permission_required('managementime.delete_console')
 @login_required
 def UserDeleteView(request, pk):
     user = get_object_or_404(User, pk=pk)
     user.delete()
     return redirect(to='users')
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
 class TermsConditionsView(TemplateView):
     template_name = "managementime/terminos.html"
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class BackupView(View):
+class BackupView(LoginRequiredMixin,PermissionRequiredMixin,View):
+    login_url='/login/'
+    permission_required = 'managementime.add_user'
+    
     def get(self, request):
         games_times = GameTime.objects.all()
         consoles = Console.objects.all()
@@ -271,9 +284,10 @@ class BackupView(View):
         response = HttpResponse(data, content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename="backup-alpha-gamer.json"'
         return response
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
-class RestoreView(FormView):
+class RestoreView(LoginRequiredMixin,PermissionRequiredMixin,FormView):
+    login_url='/login/'
     template_name = 'managementime/restore.html'
+    permission_required = 'managementime.add_user'
     form_class = BackupForm
     success_url = '/restore/'
 
@@ -295,24 +309,39 @@ class RestoreView(FormView):
 class HelpView(View):
     template_name = 'managementime/ayuda.html'
     success_template_name = 'managementime/contact_success.html'
+    email_template_name = 'managementime/email_template.html'
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        name = request.POST.get('name')
+        name = self.get_formatted_name(request.POST.get('name'))
         email = request.POST.get('email')
-        subject = request.POST.get('subject')
-        message = request.POST.get('message')
+        subject = request.POST.get('subject').capitalize()
+        message = request.POST.get('message').capitalize()
 
-        # Envía el correo electrónico al soporte técnico de la empresa
+        self.send_email(email, subject, message, name)
+
+        return render(request, self.success_template_name)
+
+    def get_formatted_name(self, name):
+        formatted_name = ' '.join(word.capitalize() for word in name.split())
+        return formatted_name
+
+    def send_email(self, email, subject, message, name):
+        context = {
+            'name': name,
+            'email': email,
+            'subject': subject,
+            'message': message,
+        }
+        contenido_correo = render_to_string(self.email_template_name, context)
+
         send_mail(
             subject,
-            f'Nombre: {name}\nCorreo electrónico: {email}\nMensaje: {message}',
-            settings.DEFAULT_FROM_EMAIL,
-            ['angelesteban0326@gmail.com'],
+            '',
+            email,
+            [settings.DEFAULT_FROM_EMAIL, email],
+            html_message=contenido_correo,
             fail_silently=False,
         )
-
-        # Renderiza una página de confirmación de envío
-        return render(request, self.success_template_name)
