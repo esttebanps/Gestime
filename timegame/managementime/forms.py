@@ -189,13 +189,12 @@ class CustomPasswordChangeForm(PasswordChangeForm):
 #Formulario personalizado para cambiar la contraseña con campos para la nueva contraseña y su confirmación.
 class CustomSetPasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
-        label="New password",
+        label="Nueva contraseña",
         widget=forms.PasswordInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Contraseña nueva'}),
         strip=False,
-        help_text="Enter a strong password with at least 8 characters.",
     )
     new_password2 = forms.CharField(
-        label="Confirm new password",
+        label="Repetir contraseña",
         strip=False,
         widget=forms.PasswordInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Contraseña nueva'}),
     )

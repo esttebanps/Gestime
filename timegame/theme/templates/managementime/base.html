@@ -106,30 +106,55 @@
 				var increaseBtn = document.getElementById('btn-increase-font');
 				var decreaseBtn = document.getElementById('btn-decrease-font');
 				var html = document.documentElement;
+		
+				// Función para guardar el tamaño de fuente en el almacenamiento local
+				function saveFontSize(fontSize) {
+					localStorage.setItem('fontSize', fontSize);
+				}
+		
+				// Función para cargar el tamaño de fuente desde el almacenamiento local
+				function loadFontSize() {
+					var savedFontSize = localStorage.getItem('fontSize');
+					if (savedFontSize) {
+						html.style.fontSize = savedFontSize + 'px';
+					}
+				}
+		
+				// Obtener el tamaño de fuente original
 				var originalFontSize = parseFloat(window.getComputedStyle(html).fontSize);
-			  
+		
+				// Cargar el tamaño de fuente al cargar la página
+				loadFontSize();
+		
 				increaseBtn.addEventListener('click', function() {
-				  var currentFontSize = parseFloat(window.getComputedStyle(html).fontSize);
-				  var newFontSize = currentFontSize + 1;
-			  
-				  html.style.fontSize = newFontSize + 'px';
+					var currentFontSize = parseFloat(window.getComputedStyle(html).fontSize);
+					var newFontSize = currentFontSize + 1;
+		
+					html.style.fontSize = newFontSize + 'px';
+		
+					// Guardar el nuevo tamaño de fuente en el almacenamiento local
+					saveFontSize(newFontSize);
 				});
-			  
+		
 				decreaseBtn.addEventListener('click', function() {
-				  var currentFontSize = parseFloat(window.getComputedStyle(html).fontSize);
-				  var newFontSize = currentFontSize - 1;
-			  
-				  html.style.fontSize = newFontSize + 'px';
+					var currentFontSize = parseFloat(window.getComputedStyle(html).fontSize);
+					var newFontSize = currentFontSize - 1;
+		
+					html.style.fontSize = newFontSize + 'px';
+		
+					// Guardar el nuevo tamaño de fuente en el almacenamiento local
+					saveFontSize(newFontSize);
 				});
-			  
+		
 				document.addEventListener('dblclick', function() {
-				  html.style.fontSize = originalFontSize + 'px';
+					html.style.fontSize = originalFontSize + 'px';
+		
+					// Eliminar el tamaño de fuente guardado del almacenamiento local
+					localStorage.removeItem('fontSize');
 				});
-			  });
-			  
-			
-
+			});
 		</script>
+		
 
 		<script src= "https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.all.min.js" ></script>
 		
