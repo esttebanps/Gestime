@@ -1,9 +1,4 @@
 # Gestime
-
-| <img width="300" alt="2023-03-29 (2)" src="https://user-images.githubusercontent.com/86686071/228690064-8c6c77d1-3756-4de4-b14b-23a52d9110bb.png"> | <img width="300" alt="2023-03-29 (5)" src="https://user-images.githubusercontent.com/86686071/228690380-31bd6940-ce3c-492c-8b94-3ace5facb65a.png"> |
-| --- | --- |
-| <img width="300" alt="2023-03-29 (6)" src="https://user-images.githubusercontent.com/86686071/228690318-4e69b3c8-1af9-43a1-92e9-c7d66f49cef4.png"> | <img width="300" alt="2023-03-29 (4)" src="https://user-images.githubusercontent.com/86686071/228690343-f0a0fe5e-7037-4d9e-b35a-1ca714d55f09.png"> |
-
 ## Descripción
 
 Gestime es un sistema de registro y seguimiento del tiempo de juego en una sala de videojuegos. El administrador puede crear cuentas de acceso para los empleados, quienes a su vez pueden registrar el inicio y fin de las sesiones de juego de los clientes. El sistema permite a los empleados visualizar la hora de salida y el costo total de las sesiones de juego de los clientes, así como generar reportes.
