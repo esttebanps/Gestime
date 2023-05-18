@@ -188,17 +188,12 @@ class DateRangeRecordsView(TemplateView):
                 record.total_cost = record.price.total_cost
                 record.price_id = record.price.id
 
-                # Obtén la fecha actual
-                # Obtén la fecha actual
                 fecha_actual = dt.date.today()
 
-                # Crea un objeto datetime.datetime utilizando los valores de hora, minuto y segundo de datetime.time
                 start_datetime = datetime.combine(fecha_actual, datetime.min.time()) + timedelta(hours=record.start_time.hour, minutes=record.start_time.minute, seconds=record.start_time.second)
                 end_datetime = datetime.combine(fecha_actual, datetime.min.time()) + timedelta(hours=record.end_time.hour, minutes=record.end_time.minute, seconds=record.end_time.second)
-                # Calcular tiempo jugado
                 time_played = end_datetime - start_datetime
 
-                # Asegurarse de que los valores de tiempo jugado sean no negativos
                 if time_played < timedelta():
                     time_played = timedelta()
 
@@ -274,13 +269,10 @@ class BackupView(LoginRequiredMixin,PermissionRequiredMixin,View):
         consoles = Console.objects.all()
         prices = Price.objects.all()
 
-        # Concatenamos los tres conjuntos de objetos en una sola lista
         data = list(chain(games_times, consoles, prices))
 
-        # Serializamos la lista completa
         data = serializers.serialize('json', data)
 
-        # Creamos la respuesta HTTP y la devolvemos
         response = HttpResponse(data, content_type='application/json')
         response['Content-Disposition'] = 'attachment; filename="backup-alpha-gamer.json"'
         return response

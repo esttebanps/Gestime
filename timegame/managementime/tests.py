@@ -6,15 +6,10 @@ from django.test import TestCase
 # from managementime import models
 # from managementime.forms import TiempoJuegoForm
 
-# Create your tests here.
-    # Tests that the form submission with valid data creates a new instance of TiempoJuego and redirects to the success URL. 
-    # Tests that the calculation of time and cost with valid input creates a new instance of Precio associated with a new instance of TiempoJuego. 
 """
 def test_calculation_valid_input(self):
-
-    #Test that the calculation of time and cost with valid input creates a new instance of Precio associated with a new instance of TiempoJuego.
     
-    consola = models.Consola.objects.create(nombre='PS4')
+    consola = models.Consola.objects.create(nombre='Consola 1')
     
     tiempo_juego = models.TiempoJuego.objects.create(
         consola=consola,

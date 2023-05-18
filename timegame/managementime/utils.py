@@ -56,7 +56,6 @@ def process_game_time(game_time, extra_controller):
     
 def update_game_time(game_time, changed_data, cleaned_data):
     if 'hours' in changed_data or 'minutes' in changed_data:
-        # El usuario cambió la cantidad de horas o minutos, por lo que necesitamos recalcular la hora de finalización
         start_time = game_time.start_time
         calculate_end_time(game_time, start_time)
     
@@ -68,8 +67,8 @@ def update_game_time(game_time, changed_data, cleaned_data):
             game_time.hours = played_time.seconds // 3600
             game_time.minutes = (played_time.seconds // 60) % 60
             price = Price.objects.get(game_time=game_time)
-            total_price = price.time_cost * game_time.hours  # Calcular el precio total
-            game_time.total_price = total_price  # Actualizar el precio total en el objeto TiempoJuego
+            total_price = price.time_cost * game_time.hours  
+            game_time.total_price = total_price  
         else:
             game_time.hours = None
             game_time.minutes = None

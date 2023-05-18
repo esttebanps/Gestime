@@ -7,7 +7,6 @@ from django.forms.widgets import *
 from datetime import datetime
 from .models import *
 
-#Formulario Django para crear/actualizar instancias de TiempoJuego con campos personalizados y widgets de entrada de datos personalizados.
 class GameTimeForm(forms.ModelForm):
     end_time = forms.TimeField(required=False, widget=forms.TimeInput(attrs={'type': 'time', 'step': 60, 'format': '%H:%M', 'class':'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}))
     
@@ -47,7 +46,6 @@ class GameTimeForm(forms.ModelForm):
         cleaned_data['minutes'] = minutes
         return cleaned_data
 
-#Formulario Django para crear/actualizar instancias de Consola con un campo nombre y un widget personalizado TextInput.
 class ConsoleForm(forms.ModelForm):
     class Meta:
         model = Console
@@ -59,7 +57,6 @@ class ConsoleForm(forms.ModelForm):
         name = self.cleaned_data.get('name')
         return name.capitalize()
 
-#Formulario Django para filtrar registros en un rango de fechas, con validación de fecha inicial no mayor que la final.
 class ReportForm(forms.Form):
 
     start_date = forms.DateField(
@@ -81,7 +78,6 @@ class ReportForm(forms.Form):
         if start_date and end_date and start_date >= end_date:
             raise forms.ValidationError('La fecha inicial debe ser anterior a la fecha final.')
 
-#Formulario de registro de usuario personalizado en Django con campos de correo electrónico, nombre de usuario, contraseña y confirmación de contraseña.
 class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
@@ -95,7 +91,6 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
 
-        # Verificar si ya existe un usuario con el mismo correo electrónico
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('Este correo electrónico ya está en uso.')
 
@@ -169,24 +164,20 @@ class CustomUserChangeForm(forms.ModelForm):
         model = User
         fields = ['username', 'email', 'is_active', 'is_staff', 'is_superuser']
 
-#Este es un formulario de inicio de sesión personalizado que hereda de AuthenticationForm. El formulario incluye dos campos para que el usuario ingrese su nombre de usuario y contraseña, con atributos personalizados de HTML y CSS.
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':' Nombre de usuario'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Contraseña'}))
 
-#Formulario de restablecimiento de contraseña con campo de correo electrónico.
 class PasswordResetForm(PasswordResetForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={
         'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Correo electronico'
     }))
 
-#La clase "CustomPasswordChangeForm" hereda de la clase "PasswordChangeForm" y contiene campos para la contraseña antigua y la nueva contraseña. Los campos utilizan widgets con estilos y mensajes personalizados.
 class CustomPasswordChangeForm(PasswordChangeForm):
     old_password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Contraseña antigua'}))
     new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Nueva contraseña'}))
     new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class':'block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline', 'placeholder':'Confirmar nueva contraseña'}))
 
-#Formulario personalizado para cambiar la contraseña con campos para la nueva contraseña y su confirmación.
 class CustomSetPasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
         label="Nueva contraseña",
