@@ -11,7 +11,7 @@ Gestime es un sistema de registro y seguimiento del tiempo de juego en una sala 
 
 ## Instalación
 
-1. Clonar este repositorio: `git clone https://github.com/tu-usuario/tienda-en-linea.git`
+1. Clonar este repositorio: `git clone https://github.com/tu-usuario/tienda-en-linea.git` (usa tu link)
 2. Crear un entorno virtual: `python -m venv nombre-del-entorno`
 3. Instalar las dependencias: `pip install -r requirements.txt`
 4. Configurar la base de datos en `settings.py`.
